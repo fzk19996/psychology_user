@@ -67,7 +67,7 @@
         collectionsList:[],
         isCollectionsList:false,
         testList:[],
-        offset:0,
+        index:0,
         limit:20,
         answers:[]
       }
@@ -97,7 +97,7 @@
         }, 1000)
       },
       async getAllTest(){
-        let result = await getTestList(qs.stringify({offset:this.offset, limit:this.limit}));
+        let result = await getTestList(qs.stringify({index:this.index, limit:this.limit}));
         if (result.status == 200){
           this.testList = result.data;
         }

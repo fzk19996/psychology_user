@@ -44,7 +44,9 @@
         <section class="que" v-for="(item, index) in experiment.questions" :key="item.question_id"
                v-show="index == current_index_e">
                <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}[{{item.type}}]</span>
-               <img v-if="item.pic_url" :src="item.pic_url" :height="200" :width="400">
+               <div>
+                <img v-if="item.pic_url" :src="item.pic_url" :height="200" :width="400">
+               </div>
                <template v-if="item.type=='按键反应'">
                  <div class="fill_option">
                   <mu-text-field v-model="fillAnswer" label="填写数字" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
@@ -175,6 +177,11 @@
         //试卷问题类型数量
         queNumInfo: {},
 
+        table_answer_template:{
+          table_title: '',
+          score: 0
+        },
+
         experiment_answer_template:{
           question: '',
           answer: '',
@@ -279,7 +286,7 @@
       ]),
 
       start_timer(){
-        if(this.time_use>=5){
+        if(this.time_use>=this.experiment.questions[this.current_index_e].time_limit){
           this.time_use = 0
           this.nextExperimentQuestion()
         }else{
@@ -328,7 +335,7 @@
         this.tableList = result.data.tableList
         this.experiment = result.data.experiment
         for(var i=0;i<this.tableList.length;i++){
-          this.tableAnswer.push(0)
+          this.tableAnswer.push(JSON.parse(JSON.stringify(this.table_answer_template)))
         }
         console.log('questions')
         console.log(this.experiment.questions)
@@ -346,7 +353,7 @@
 
 
       //用户手动点击提交试卷按钮，弹出确认框
-      clickSubmit(){
+    async clickSubmit(){
         if(!this.setAnswer())
           return
         if(this.video_url===""){
@@ -356,12 +363,19 @@
           });
           return
         }
-        MessageBox.confirm('确定要提交试卷吗?').then(action => {
-          let result = this.handleSubmit();
-          if (result){
+        // MessageBox.confirm('确定要提交试卷吗?').then(action => {
+          let res = await addAnswer({
+            'table_answer_list':this.tableAnswer,
+            'experiment_answer_list':this.experimentAnswer,
+            'test_id': this.test_id,
+            'video_url':this.video_url
+          })
+          console.log('提交试卷得到结果')
+          console.log(res)
+          if (res.status==200){
             //等待成绩计算完毕并插入数据库表
             Indicator.open({
-              text: '自动计算成绩中...',
+              text: '已经成功提交答案请稍等...',
               spinnerType: 'double-bounce'
             });
             setTimeout(() => {
@@ -371,19 +385,16 @@
                 duration: 1500
               });
               this.$router.replace('/profile/');
-            }, 4000)
+            }, 2000)
           }
           else {
             Toast({
-              message:'交卷失败，数据库错误，请重新开始考试',
+              message:'交卷失败',
               duration: 1500
             });
-            this.$router.replace('/profile')
+            // this.$router.replace('/profile')
           }
-        },() => {
-          //点击取消按钮操作
-        })
-      },
+        },
       //最终提交答案，包含用户手动点击提交按钮和到时自动提交
       async handleSubmit() {
         let result = await addAnswer({
@@ -392,6 +403,7 @@
           'test_id': this.test_id,
           'video_url':this.video_url
         })
+        return result
 
       },
  
@@ -430,7 +442,8 @@
               return false
             }
             console.log('成功')
-            this.tableAnswer[this.table_index] += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].score)
+            this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
+            this.tableAnswer[this.table_index].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].score)
             this.singleAnswer = ''
           }else{
             if(this.multipleAnswer.length==0){
@@ -441,7 +454,8 @@
               return false
             }
             for(var index in this.multipleAnswer)
-              this.tableAnswer[this.table_index] += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[index].score)
+              this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
+              this.tableAnswer[this.table_index].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[index].score)
               this.multipleAnswer = []
           }
         }
