@@ -99,26 +99,17 @@
       <section class="que" v-for="(item, index) in tableList[table_index].questions" :key="item.question_id"
                v-show="index == current_index_t">
         <div class="content">
-          <!-- <span class="que_type">(单选题)</span> -->
-          <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score">[分]</span></span>
+          <span class="que_type">{{item.type}}</span>
+          <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
           <template v-if="item.type=='单选'">
             <div v-for="(option, optionIndex) in item.options"
                 :key="'single'+ item.option_id + optionIndex">
-              <!--            <mt-radio
-                            v-model="singleAnswer"
-                            :options="singleQueList[0].options">
-                          </mt-radio>-->
-              <!-- <div > -->
-                <!-- <div v-for="(pic_src, pic_index) in option.picList.split(';')" :key="pic_index" >
-                    <img :src="pic_src" :height="200" :width="200">
-                </div> -->
-              <!-- </div> -->
               <div class="single_option">
               <mu-radio :value="optionIndex" v-model="singleAnswer" :label="option.content" v-if="option.content"  >
               </mu-radio>
-              <span v-for="(pic_src, pic_index) in option.picList.split(';')" :key="pic_index" >
+              <!-- <span v-for="(pic_src, pic_index) in option.picList.split(';')" :key="pic_index" >
                   <img :src="pic_src" :height="200" :width="200" style="margin-left:50px">
-              </span>
+              </span> -->
               </div>
             </div>
           </template>
@@ -128,6 +119,11 @@
             <mu-checkbox :value="optionIndex" v-model="multipleAnswer" :label="option.content" style="margin-left:50px"
                         ></mu-checkbox>
             </div>
+          </template>
+          <template v-if="item.type=='填空'||item.type=='打分'">
+                 <div class="fill_option">
+                  <mu-text-field v-model="fillAnswer" label="填写词语" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
+                </div>
           </template>
         </div>
       </section>
@@ -177,8 +173,16 @@
         //试卷问题类型数量
         queNumInfo: {},
 
-        table_answer_template:{
+        table_answer_total_template:{
           table_title: '',
+          expression: '',
+          table_answers:[]
+        },
+
+        table_answer_template:{
+          que_type: '',
+          question: '',
+          answer: '',
           score: 0
         },
 
@@ -335,7 +339,12 @@
         this.tableList = result.data.tableList
         this.experiment = result.data.experiment
         for(var i=0;i<this.tableList.length;i++){
-          this.tableAnswer.push(JSON.parse(JSON.stringify(this.table_answer_template)))
+          this.tableAnswer.push(JSON.parse(JSON.stringify(this.table_answer_total_template)))
+          console.log('add table_answer')
+          for(var j=0;j<this.tableList[i].questions.length;j++){
+            console.log('add table_answer_question  ')
+            this.tableAnswer[i].table_answers.push(JSON.parse(JSON.stringify(this.table_answer_template)))
+          }
         }
         console.log('questions')
         console.log(this.experiment.questions)
@@ -433,6 +442,10 @@
           this.experimentAnswer[this.current_index_e].type = this.experiment.questions[this.current_index_e].type
           this.fillAnswer = ''
         }else{
+          if(this.current_index_t==0){
+              this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
+              this.tableAnswer[this.table_index].expression = this.tableList[this.table_index].expression
+            }
           if(this.tableList[this.table_index].questions[this.current_index_t].type=='单选'){
             if(this.singleAnswer === ''){
               Toast({
@@ -441,11 +454,12 @@
               })
               return false
             }
-            console.log('成功')
-            this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
-            this.tableAnswer[this.table_index].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].score)
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].score = parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].score)
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer =this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].content
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '单选'
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
             this.singleAnswer = ''
-          }else{
+          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='多选'){
             if(this.multipleAnswer.length==0){
               Toast({
                 message: '还没有选中选项',
@@ -453,10 +467,37 @@
               })
               return false
             }
-            for(var index in this.multipleAnswer)
-              this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
-              this.tableAnswer[this.table_index].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[index].score)
-              this.multipleAnswer = []
+            for(var index in this.multipleAnswer){
+              this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer += this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].content + ';'
+              this.tableAnswer[this.table_index].table_answers[this.current_index_t].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[index].score)
+            }
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '多选'
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
+            this.multipleAnswer = []
+          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='填空'){
+            if(this.fillAnswer.length==0){
+              Toast({
+                message: '还没有填写内容',
+                duration: 2000
+              })
+              return false
+            }
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer = this.fillAnswer
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '填空'
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
+            this.fillAnswer = ''
+          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='打分'){
+            if(this.fillAnswer.length==0){
+              Toast({
+                message: '还没有填写内容',
+                duration: 2000
+              })
+              return false
+            }
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer = this.fillAnswer
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '打分'
+            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
+            this.fillAnswer = ''
           }
         }
         return true

@@ -23,10 +23,8 @@ axios.interceptors.response.use((response) => {
     })
   }
   if(response.status==200){
-    console.log("拦截成功")
     return response
   }
-  console.log("出现错误了")
 })
 export default function ajax (url = '', data = {}, type = 'GET', header='application/json;charset=utf-8') {
   // 返回值 Promise对象 （异步返回的数据是response.data，而不是response）
