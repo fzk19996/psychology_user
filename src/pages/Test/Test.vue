@@ -47,7 +47,7 @@
                <div>
                 <img v-if="item.pic_url" :src="item.pic_url" :height="200" :width="400">
                </div>
-               <template v-if="item.type=='按键反应'">
+               <template v-if="item.type=='奖励按键反应'||item.type=='惩罚按键反应'||item.type=='无反馈按键反应'">
                  <div class="fill_option">
                   <mu-text-field v-model="fillAnswer" label="填写数字" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
                 </div>
@@ -238,6 +238,8 @@
         video_url: '',
         videoFlag: false, //是否显示进度条
         videoUploadPercent: "", //进度条的进度，
+        record_time_list:['奖励按键反应','惩罚按键反应','无反馈按键反应','根据要求说出词语','记忆测验'],
+        start_question_time:0
       }
     },
     computed:{
@@ -322,12 +324,21 @@
         if(this.current_index_e>=0 && !this.setAnswer())
           return
         this.current_index_e += 1
-        if(this.current_index_e-1>=0 && this.experiment.questions[this.current_index_e-1].type=='按键反应'){
-            clearInterval(this.timer)
+        this.start_question_time = new Date().getTime()
+        // if(this.current_index_e-1>=0){
+        //   if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
+        //       ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
+        //       ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
+        //       ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'
+        //       ||this.experiment.questions[this.current_index_e].type=='记忆测验'){
+        //   }
+        // }
+        if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'){
             this.time_use = 0
-        }
-        if(this.experiment.questions[this.current_index_e].type=='按键反应'){
-          this.timer = setInterval(this.start_timer, 1000)
+            this.timer = setInterval(this.start_timer, 1000)
         }
       },
 
@@ -431,12 +442,28 @@
       },
       setAnswer(){
         if(this.is_experiment){
-          console.log('experiment answer')
-          console.log(this.experimentAnswer)
-          if(this.experiment.questions[this.current_index_e].type=='按键反应'){
-            this.experimentAnswer[this.current_index_e].time_use = this.time_use
+          if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'){
+              clearInterval(this.timer)
+              if(this.experiment.questions[this.current_index_e].type=='奖励按键反应' 
+                && this.experiment.questions[this.current_index_e].right_answer === this.fillAnswer){
+                  alert("回答正确")
+              }else if(this.experiment.questions[this.current_index_e].type=='惩罚按键反应' 
+                && this.experiment.questions[this.current_index_e].right_answer !== this.fillAnswer){
+                  alert("回答错误")
+              }
           }
-          console.log(this.current_index_e)
+          console.log("下一步")
+          if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
+            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'
+            ||this.experiment.questions[this.current_index_e].type=='记忆测验')
+          {
+             this.experimentAnswer[this.current_index_e].time_use = new Date().getTime() - this.start_question_time
+          }
           this.experimentAnswer[this.current_index_e].answer = this.fillAnswer
           this.experimentAnswer[this.current_index_e].question = this.experiment.questions[this.current_index_e].question
           this.experimentAnswer[this.current_index_e].type = this.experiment.questions[this.current_index_e].type
