@@ -47,7 +47,7 @@
       </section>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
-          <template v-if="index===experimentData.questions.length-1">
+          <template v-if="current_index===experimentData.questions.length-1">
             <mt-button type="primary" @click.native="clickSubmit" >提交测试</mt-button>
             <el-upload
                 class="upload"
@@ -177,70 +177,69 @@
             if(e1 && e1.keyCode==49+0){ //按键1
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'){
-                    console.log('符合按键反应题目')
-                    this.fillAnswer = '1'
+                    that.fillAnswer = '1'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'){
-                    this.fillAnswer = '2'
+                    that.fillAnswer = '2'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+2){ //按键3
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '3'
+                    that.fillAnswer = '3'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '4'
+                    that.fillAnswer = '4'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '5'
+                    that.fillAnswer = '5'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+5){ //按键6
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '6'
+                    that.fillAnswer = '6'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+6){ //按键7
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '7'
+                    that.fillAnswer = '7'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+7){ //按键8
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '8'
+                    that.fillAnswer = '8'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+8){ //按键9
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    this.fillAnswer = '0'
+                    that.fillAnswer = '0'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==32){
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'){
+                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'){
                     console.log('下一题')
                     that.nextQuestion()
                 }
@@ -390,6 +389,7 @@
         if(this.experimentData.questions[this.current_index].time_limit!=0){
             clearInterval(this.timer)
             this.answer.answer_list[this.current_index].time_use = new Date().getTime() - this.start_question_time
+            console.log(this.fillAnswer)
             if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
                   this.$message.success('回答正确')
