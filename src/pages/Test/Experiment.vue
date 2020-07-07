@@ -239,7 +239,7 @@
             }
             else if(e1 && e1.keyCode==32){
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'&&question_now.type!='工作记忆反应'){
+                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'&&question_now.type!='工作记忆模板'){
                     console.log('下一题')
                     that.nextQuestion()
                 }
