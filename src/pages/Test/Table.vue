@@ -1,6 +1,6 @@
 <template>
   <section class="paper">
-    <HeaderTop :title="paperInfo.paperName" class="paper_header">
+    <HeaderTop :title="tableData.title" class="paper_header">
       <a href="javascript:" slot="left" class="go_back" @click="toBack">
         <i class="iconfont iconfanhui"></i>
       </a>
@@ -14,19 +14,21 @@
 
     <!--考试日期和考试时长-->
     <div class="paper_sub_title_first">
-      <span class="paper_date">考试日期：{{currentDate | date-format('YYYY-MM-DD')}}</span>
-      <span class="paper_duration">考试时长：{{paperInfo.paperDuration/60}}分钟</span>
+      <span class="paper_date">考试日期：</span>
+      <span class="paper_duration">考试时长：分钟</span>
     </div>
 
     <!--时间提醒和当前题数-->
+    <template v-if="JSON.stringify(tableData)!=='{}'">
     <div class="paper_sub_title_second">
-      <span class="paper_clock"><i class="iconfont iconjishiqi"></i>{{restTime}}</span>
-      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{currentIndex + 1}}/{{queNumInfo.totalNum}}</span>
+      <span class="paper_clock"><i class="iconfont iconjishiqi"></i></span>
+      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{currentIndex + 1}}/{{tableData.questions.length}}</span>
     </div>
+    </template>
 
     <!--考卷进度条提醒-->
     <div>
-      <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"></el-progress>
+      <!-- <el-progress :text-inside="true" :stroke-width="18" :percentage="percentage"></el-progress> -->
     </div>
 
     <!-- 缓存路由组件对象 -->
@@ -35,117 +37,34 @@
         </keep-alive>-->
 
     <!--试卷问题及选项区域-->
-    <div class="paper_container" v-show="showPaperContainer">
-      <!--单选题列表-->
-      <template v-if="table_index==tableList.length">
-        <section class="que" v-show="current_index_e==-1 && table_index==tableList.length">
-            <span class="que_content">开始进行实验{{experiment.title}}</span>
-        </section>
-        <section class="que" v-for="(item, index) in experiment.questions" :key="item.question_id"
-               v-show="index == current_index_e">
-               <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}[{{item.type}}]</span>
-               <div>
-                <img v-if="item.pic_url" :src="item.pic_url" :height="300" :width="600">
-               </div>
-               <template v-if="item.type=='奖励按键反应'||item.type=='惩罚按键反应'||item.type=='无反馈按键反应'">
-                 <div class="fill_option">  
-                  <mu-text-field v-model="fillAnswer" label="填写数字" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-               </template>
-               <template v-if="item.type=='根据要求说出词语'">
-                 <div class="fill_option">
-                  <mu-text-field v-model="fillAnswer" label="填写词语" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-               </template>
-               <template v-if="item.type=='朗读'">
-                 <div class="fill_option">
-                  朗读题目中的语句
-                </div>
-               </template>
-               <template v-if="item.type=='看图回答问题'">
-                 <div class="fill_option">
-                  <mu-text-field v-model="fillAnswer" label="根据图片内容填写" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-               </template>
-               <template v-if="item.type=='根据提问回答问题'">
-                 <div class="fill_option">
-                  <mu-text-field v-model="fillAnswer" label="填写内容" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-               </template>
-               <template v-if="item.type=='记忆测验'">
-                 <div class="fill_option">
-                  <mu-text-field v-model="fillAnswer" label="填写数字" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-               </template>
-        </section>
-        <template v-if="current_index_e==experiment.questions.length-1">
-              <el-upload
-            class="upload"
-            action="/api/video/upload"
-            :show-file-list="true"
-            :on-success="handleVideoSuccess"
-            :before-upload="beforeUploadVideo"
-            :on-progress="uploadVideoProcess"
-            :file-list="videoList"
-          >
-            <li>上传录音</li>
-        </el-upload>
-        </template>
-      </template>
-      <template v-if="table_index<tableList.length">
-      <section class="que" v-show="current_index_t==-1">
-          <span class="que_content">开始进行量表{{tableList[table_index].title}}</span>
-      </section>
-      <section class="que" v-for="(item, index) in tableList[table_index].questions" :key="item.question_id"
-               v-show="index == current_index_t">
+    <div class="paper_container">
+      <!-- <template v-if="JSON.stringify(tableData)!=='{}'"> -->
+      <section class="que" v-for="(item, index) in tableData.questions" :key="index"
+               v-show="index == current_index">
         <div class="content">
-          <span class="que_type">{{item.type}}</span>
-          <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
           <template v-if="item.type=='单选'">
+            <span class="que_type">{{item.type}}</span>
+            <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <div v-for="(option, optionIndex) in item.options"
                 :key="'single'+ item.option_id + optionIndex">
               <div class="single_option">
-              <mu-radio :value="optionIndex" v-model="singleAnswer" :label="optionIndex" v-if="option.content"  >
-              </mu-radio>
-              <!-- <span v-for="(pic_src, pic_index) in option.picList.split(';')" :key="pic_index" >
-                  <img :src="pic_src" :height="200" :width="200" style="margin-left:50px">
-              </span> -->
+              <mu-radio :value="optionIndex" v-model="singleAnswer" :label="option.content" v-if="option.content"  ></mu-radio>
               </div>
             </div>
           </template>
           <template v-if="item.type=='多选'">
             <div class="multiple_option" v-for="(option, optionIndex) in item.options"
                :key="'multiple'+ item.option_id + optionIndex">
-            <mu-checkbox :value="optionIndex" v-model="multipleAnswer" :label="option.content" style="margin-left:50px"
+            <mu-checkbox :value="optionIndex+''" v-model="multipleAnswer" :label="option.content" style="margin-left:50px"
                         ></mu-checkbox>
             </div>
           </template>
-          <template v-if="item.type=='填空'||item.type=='打分'">
-                 <div class="fill_option">
-                  <mu-text-field v-model="fillAnswer" label="填写词语" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
-                </div>
-          </template>
         </div>
       </section>
-      </template>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
-        <!-- <mt-button type="primary" @click.native="prevQuestion"
-                   :disabled="current_index < 1">{{current_index <  1 ? '无' :'上一题'}}
-        </mt-button> -->
-        <!-- <template v-if="table_index<tableList.length">
-          <mt-button type="primary" @click.native="nextTableQuestion" v-if="current_index_t != tableList[table_index].questions.length-1">下一道题</mt-button>
-          <mt-button type="primary" @click.native="nextTable" v-if="current_index_t==tableList[table_index].questions.length-1 && table_index<tableList.length-1">进入下一个量表
-          </mt-button>
-          <mt-button type="primary" @click.native="nextTable" v-if="current_index_t==tableList[table_index].questions.length-1 && table_index==tableList.length-1">进入到实验部分
-          </mt-button>
-        </template>
-        <template v-if="table_index==tableList.length">
-            <mt-button type="primary" @click.native="nextExperimentQuestion" v-if="current_index_e != experiment.questions.length-1">下一道题</mt-button>
-            <mt-button type="primary" @click.native="clickSubmit" v-if="current_index_e==experiment.questions.length-1">提交测试
-            </mt-button>
-        </template> -->
       </div>
+      <!-- </template> -->
 
     </div>
 
@@ -166,37 +85,13 @@
     name: "",
     data() {
       return {
-        //当前日期
-        currentDate: new Date(),
-        //试卷信息
-        paperInfo: {},
-        //试卷问题类型数量
-        queNumInfo: {},
-
-        table_answer_total_template:{
-          table_title: '',
-          expression: '',
-          table_answers:[]
+        
+        answer:{
+            answer_list:[],
+            current_index:'',
+            table_id:''
         },
 
-        table_answer_template:{
-          que_type: '',
-          question: '',
-          answer: '',
-          score: 0
-        },
-
-        experiment_answer_template:{
-          question: '',
-          answer: '',
-          time_use: 0,
-          type:''
-        },
-
-        //初始化时间戳
-        currentTime: new Date().getTime(),
-        restTime: "",
-        timer: "",
         //单选题数组
         singleQueList: [],
         //单选题答案
@@ -207,39 +102,10 @@
         //多选题答案
         multipleAnswer: [],
 
-        //判断题数组
-        judgeQueList: [],
-        //判断题答案
-        judgeAnswer: '',
-
-        //填空题数组
-        fillQueList: [],
-        //填空题答案
-        fillAnswer: '',
-        //是否显示paperContainer,默认进入页面为true
-        showPaperContainer: true,
-        //是否显示paperCard答题卡，默认进入页面为false，当点击答题卡区域为true
-        showPaperCard: false,
-        timeUsed:0, //考试花费时间
-        percentage:0, //进度条值
-        test_id:0,
-        testList:[],
-        answer:[],
-        current_index_e:-1,
-        tableList:[],
+     
         experiment:{},
-        table_index:0,
-        current_index_t:-1,
-        timer:"",
-        time_use:0,
-        is_experiment:false,
-        tableAnswer:[],
-        experimentAnswer:[],
-        video_url: '',
-        videoFlag: false, //是否显示进度条
-        videoUploadPercent: "", //进度条的进度，
-        record_time_list:['奖励按键反应','惩罚按键反应','无反馈按键反应','根据要求说出词语','记忆测验'],
-        start_question_time:0
+        tableData:{},
+        current_index:0 
       }
     },
     computed:{
@@ -259,17 +125,92 @@
       //   text: '加载中...',
       //   spinnerType: 'fading-circle'
       // });
-      this.test_id = JSON.parse(this.$route.params.test_id)
-      this.getTestInfo()
+      this.table_id = this.$route.params.table_id
+      this.experiment_id = this.$route.params.experiment_id
+      if(this.table_id === ''){
+         this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
+      }
+
+      this.getTableInfo()
+      var that = this;
       document.onkeydown = function(e) {
-            console.log('但是噶')
             //事件对象兼容
             let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
             //键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
             //左
-            if(e1 && e1.keyCode==49){
-              console.log('按键1被按下')
-
+            if(e1 && e1.keyCode==49+0){ //按键1
+                var question_now = that.tableData.questions[that.current_index]
+                if(question_now.options.length>=1){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 0
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+1){ //按键2
+                var question_now = that.tableData.questions[that.current_index]
+                console.log(question_now)
+                if(question_now.options.length>=2){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 1
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+2){ //按键3
+                var question_now = that.tableData.questions[that.current_index]
+                console.log(question_now)
+                if(question_now.options.length>=3){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 2
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+3){ //按键4
+                var question_now = that.tableData.questions[that.current_index]
+                console.log(question_now)
+                if(question_now.options.length>=4){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 3
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+4){ //按键5
+                var question_now = that.tableData.questions[that.current_index]
+                if(question_now.options.length>=5){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 4
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+5){ //按键6
+                var question_now = that.tableData.questions[that.current_index]
+                console.log(question_now)
+                if(question_now.options.length>=6){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 5
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==49+6){ //按键7
+                var question_now = that.tableData.questions[that.current_index]
+                console.log(question_now)
+                if(question_now.options.length>=7){
+                    if(question_now.type=='单选'){
+                        that.singleAnswer = 6
+                    }
+                }
+            }
+            else if(e1 && e1.keyCode==32){
+                if(that.setAnswer()==true){
+                    that.answer.currentIndex += 1
+                    sessionStorage.setItem('table_answer',JSON.stringify(that.answer))
+                    if(that.current_index<that.tableData.questions.length-1){
+                        that.current_index += 1
+                    }else{
+                        console.log('跳转到实验页面')
+                        that.$router.push({name:"experiment",params:{'experiment_id':that.experiment_id,'test_id':that.test_id}})
+                    }
+                    console.log(that.current_index)
+                } 
             }
 
         }
@@ -355,25 +296,17 @@
       },
 
 
-    async getTestInfo(){
+    async getTableInfo(){
       // console.log(this.testId)
-      let result = await getTestById(qs.stringify({test_id:this.test_id}))
+      let result = await getTableById({table_id:this.table_id})
       if(result.status==200){
-        this.tableList = result.data.tableList
-        this.experiment = result.data.experiment
-        for(var i=0;i<this.tableList.length;i++){
-          this.tableAnswer.push(JSON.parse(JSON.stringify(this.table_answer_total_template)))
-          console.log('add table_answer')
-          for(var j=0;j<this.tableList[i].questions.length;j++){
-            console.log('add table_answer_question  ')
-            this.tableAnswer[i].table_answers.push(JSON.parse(JSON.stringify(this.table_answer_template)))
-          }
+        console.log('量表数据')
+        this.tableData = result.data
+        console.log(this.tableData)
+        for(var i=0;i<this.tableData.questions.length;i++){
+            this.answer.answer_list.push('')
         }
-        console.log('questions')
-        console.log(this.experiment.questions)
-        for(var i=0;i<this.experiment.questions.length;i++){
-          this.experimentAnswer.push(JSON.parse(JSON.stringify(this.experiment_answer_template)))
-        }
+        this.answer.table_id = this.table_id
       }else{
         Toast({
             message: result.msg,
@@ -453,91 +386,17 @@
         })
       },
       setAnswer(){
-        if(this.is_experiment){
-          if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'){
-              clearInterval(this.timer)
-              if(this.experiment.questions[this.current_index_e].type=='奖励按键反应' 
-                && this.experiment.questions[this.current_index_e].right_answer === this.fillAnswer){
-                  alert("回答正确")
-              }else if(this.experiment.questions[this.current_index_e].type=='惩罚按键反应' 
-                && this.experiment.questions[this.current_index_e].right_answer !== this.fillAnswer){
-                  alert("回答错误")
-              }
-          }
-          console.log("下一步")
-          if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'
-            ||this.experiment.questions[this.current_index_e].type=='记忆测验')
-          {
-             xperimentAnthis.eswer[this.current_index_e].time_use = new Date().getTime() - this.start_question_time
-          }
-          this.experimentAnswer[this.current_index_e].answer = this.fillAnswer
-          this.experimentAnswer[this.current_index_e].question = this.experiment.questions[this.current_index_e].question
-          this.experimentAnswer[this.current_index_e].type = this.experiment.questions[this.current_index_e].type
-          this.fillAnswer = ''
-        }else{
-          if(this.current_index_t==0){
-              this.tableAnswer[this.table_index].table_title = this.tableList[this.table_index].title
-              this.tableAnswer[this.table_index].expression = this.tableList[this.table_index].expression
+        if(this.tableData.questions[this.current_index].type=='单选'){
+            if(this.singleAnswer===''){
+                Toast({
+                    message: '还没有选择选项',
+                    duration: 1500
+                });
+                return false
+            }else{
+                this.answer.answer_list[this.current_index] = this.singleAnswer
+                this.singleAnswer = ''
             }
-          if(this.tableList[this.table_index].questions[this.current_index_t].type=='单选'){
-            if(this.singleAnswer === ''){
-              Toast({
-                message: '还没有选中选项',
-                duration: 2000
-              })
-              return false
-            }
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].score = parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].score)
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer =this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].content
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '单选'
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
-            this.singleAnswer = ''
-          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='多选'){
-            if(this.multipleAnswer.length==0){
-              Toast({
-                message: '还没有选中选项',
-                duration: 2000
-              })
-              return false
-            }
-            for(var index in this.multipleAnswer){
-              this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer += this.tableList[this.table_index].questions[this.current_index_t].options[this.singleAnswer].content + ';'
-              this.tableAnswer[this.table_index].table_answers[this.current_index_t].score += parseInt(this.tableList[this.table_index].questions[this.current_index_t].options[index].score)
-            }
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '多选'
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
-            this.multipleAnswer = []
-          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='填空'){
-            if(this.fillAnswer.length==0){
-              Toast({
-                message: '还没有填写内容',
-                duration: 2000
-              })
-              return false
-            }
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer = this.fillAnswer
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '填空'
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
-            this.fillAnswer = ''
-          }else if(this.tableList[this.table_index].questions[this.current_index_t].type=='打分'){
-            if(this.fillAnswer.length==0){
-              Toast({
-                message: '还没有填写内容',
-                duration: 2000
-              })
-              return false
-            }
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].answer = this.fillAnswer
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].que_type = '打分'
-            this.tableAnswer[this.table_index].table_answers[this.current_index_t].question = this.tableList[this.table_index].questions[this.current_index_t].question
-            this.fillAnswer = ''
-          }
         }
         return true
       },

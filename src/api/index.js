@@ -19,6 +19,10 @@ export const getTestList = (data) => ajax('/api/psychology/test', data, 'POST', 
 
 export const getTestById = (data) =>  ajax('/api/test/getTestById', data, 'POST', 'application/x-www-form-urlencoded')
 
+export const getTableById = (data) => ajax('/api/test/queryTableById', data)
+
+export const getExperimentById = (data) => ajax('/api/test/queryExperimentById', data)
+
 export const addAnswer = (data) => ajax('/api/test/addAnswer', data, 'POST')
 
 export const getPushList = (data) => ajax('/api/psychology/article', data, 'POST', 'application/x-www-form-urlencoded')

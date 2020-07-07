@@ -129,20 +129,7 @@
         }
       },
       toCollectionDetail(test_info){
-        // if (queType == 1){
-        //   this.$router.push('/profile/collection/single/' + answerId)
-        // }
-        // else if (queType == 2){
-        //   this.$router.push('/profile/collection/multiple/' + answerId)
-        // }
-        // else if (queType == 3){
-        //   this.$router.push('/profile/collection/judge/' + answerId)
-        // }
-        // else {
-        //   this.$router.push('/profile/collection/fill/' + answerId)
-        // }
-        // this.$router.replace('/home/paper/detail/start')
-        this.$router.push({name:"test",params:{'test_id':test_info.test_id}})
+        this.$router.push({name:"table",params:{'experiment_id':test_info.experiment_id,'table_id':test_info.table_id,'test_id':test_info.test_id}})
       }
     },
     components:{

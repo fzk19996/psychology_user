@@ -33,6 +33,8 @@ import WrongDetail from '@/pages/WrongDetail/WrongDetail.vue'
 import pushList from '@/pages/push/pushList.vue'
 import pushDetail from '@/pages/push/pushDetail.vue'
 import Test from '@/pages/Test/Test.vue'
+import Table from '@/pages/Test/Table.vue'
+import Experiment from '@/pages/Test/Experiment.vue'
 /*import PaperContainer from '../pages/HomePaperStart/PaperContainer/PaperContainer.vue'
 import PaperCard from '../pages/HomePaperStart/PaperCard/PaperCard.vue'*/
 
@@ -193,6 +195,16 @@ export default new VueRouter({
       path:'/profile/test',
       name:'test',
       component:Test
+    },
+    {
+      path:'/profile/table',
+      name:'table',
+      component:Table
+    },
+    {
+      path:'/profile/experiment',
+      name:'experiment',
+      component:Experiment
     }
   ]
 })
