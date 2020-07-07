@@ -40,7 +40,7 @@
                v-show="index == current_index">
         <div class="content">
           <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{question_index}}</template>.&nbsp;[{{item.type}}]{{item.question}}</span>
-          <template v-if="item.type==='注视点'||item.type=='指导语'||item.type.indexOf('按键反应'>=0)||item.type=='看图回答问题'">
+          <template v-if="item.type==='注视点'||item.type=='指导语'||item.type.indexOf('按键反应'>=0)||item.type=='看图回答问题'||item.type=='根据要求说出词语'">
               <img v-if="item.pic_url!==''" :src="item.pic_url" height="600" width="1200"></img>
           </template>
         </div>
@@ -301,6 +301,12 @@
         this.experimentData = result.data
         for(var i=0;i<this.experimentData.questions.length;i++){
             this.answer.answer_list.push(JSON.parse(JSON.stringify(this.answer_template)))
+        }
+        this.start_question_time = new Date().getTime()
+            // }
+        if(this.experimentData.questions[this.current_index].time_limit!=0){
+            this.time_use = 0
+            this.timer = setInterval(this.start_timer, 1000)
         }
       }else{
         Toast({
