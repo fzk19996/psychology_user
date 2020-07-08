@@ -122,7 +122,7 @@
         judgeQueList: [],
         //判断题答案
         judgeAnswer: '',
-
+        test_id:'',
         //填空题数组
         fillQueList: [],
         //填空题答案
@@ -168,6 +168,7 @@
       // });
       this.experiment_id = this.$route.params.experiment_id
       this.getExperimentInfo(this.experiment_id)
+      this.test_id = this.$route.params.test_id
       var that = this;
       document.onkeydown = function(e) {
             //事件对象兼容
@@ -419,7 +420,7 @@
 
       beforeUploadVideo (file) {
         const isLt1000M = file.size / 1024 / 1024 < 1000;
-        if (['video/mp4'].indexOf(file.type) == -1) { //'video/ogg', 'video/flv', 'video/avi', 'video/wmv', 'video/rmvb'
+        if (['video/mp4'].indexOf(file.type)==-1&&['video/avi'].indexOf(file.type)==-1&&['video/mp3'].indexOf(file.type) == -1) { //'video/ogg', 'video/flv', 'video/avi', 'video/wmv', 'video/rmvb'
           this.$message.error('请上传正确的视频格式');
           return false;
         }
