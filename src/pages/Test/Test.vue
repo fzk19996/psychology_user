@@ -222,7 +222,7 @@
         showPaperCard: false,
         timeUsed:0, //考试花费时间
         percentage:0, //进度条值
-        test_id:0,
+        test_id:'',
         testList:[],
         answer:[],
         current_index_e:-1,

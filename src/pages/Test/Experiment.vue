@@ -93,7 +93,7 @@
         
         answer:{
             answer_list:[],
-            current_index:'',
+            current_index:0,
             experiment_id:''
         },
 
@@ -278,6 +278,8 @@
         if(this.current_index<this.experimentData.questions.length-1){
             if(!this.setAnswer())
                 return
+            this.answer.current_index += 1
+            sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
             if(this.experimentData.questions[this.current_index].type!='指导语'||this.experimentData.questions[this.current_index].type!='注视点'){
                 this.question_index += 1
             }
@@ -328,10 +330,13 @@
           });
           return
         }
+        let table_answer = JSON.parse(sessionStorage.getItem('table_answer'))
+        let experiment_answer = JSON.parse(sessionStorage.getItem('experiment_answer'))
+        experiment_answer.experiment_id = this.experiment_id
         // MessageBox.confirm('确定要提交试卷吗?').then(action => {
           let res = await addAnswer({
-            'table_answer_list':this.tableAnswer,
-            'experiment_answer_list':this.experimentAnswer,
+            'table_answer':table_answer,
+            'experiment_answer':experiment_answer,
             'test_id': this.test_id,
             'video_url':this.video_url
           })
@@ -362,8 +367,9 @@
         },
       //最终提交答案，包含用户手动点击提交按钮和到时自动提交
       async handleSubmit() {
+        let tableAnswer = JSON.parse(sessionStorage.getItem('table_answer'))
         let result = await addAnswer({
-          'table_answer_list':this.tableAnswer,
+          'table_answer_list':tableAnswer,
           'experiment_answer_list':this.experimentAnswer,
           'test_id': this.test_id,
           'video_url':this.video_url
@@ -400,9 +406,9 @@
             }
             if(this.experimentData.questions[this.current_index].type.indexOf('按键反应')>=0){
                 if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
-                    this.answer.answer_list[this.current_index].correct = false
+                    this.answer.answer_list[this.current_index].correct = 0
                 }else{
-                    this.answer.answer_list[this.current_index].correct = true
+                    this.answer.answer_list[this.current_index].correct = 1
                 }
             }
         }

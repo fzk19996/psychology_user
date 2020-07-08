@@ -88,7 +88,7 @@
         
         answer:{
             answer_list:[],
-            current_index:'',
+            current_index:0,
             table_id:''
         },
 
@@ -201,7 +201,8 @@
             }
             else if(e1 && e1.keyCode==32){
                 if(that.setAnswer()==true){
-                    that.answer.currentIndex += 1
+                    that.answer.current_index += 1
+                    that.answer.table_id = that.table_id
                     sessionStorage.setItem('table_answer',JSON.stringify(that.answer))
                     if(that.current_index<that.tableData.questions.length-1){
                         that.current_index += 1
