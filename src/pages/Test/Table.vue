@@ -127,6 +127,7 @@
       // });
       this.table_id = this.$route.params.table_id
       this.experiment_id = this.$route.params.experiment_id
+      this.test_id = this.$route.params.test_id
       if(this.table_id === ''){
          this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
       }
@@ -199,7 +200,7 @@
                     }
                 }
             }
-            else if(e1 && e1.keyCode==32){
+            else if(e1 && e1.keyCode==13){
                 if(that.setAnswer()==true){
                     that.answer.current_index += 1
                     that.answer.table_id = that.table_id
