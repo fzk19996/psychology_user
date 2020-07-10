@@ -53,10 +53,19 @@
             </div>
           </template>
           <template v-if="item.type=='多选'">
+            <span class="que_type">{{item.type}}</span>
+            <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <div class="multiple_option" v-for="(option, optionIndex) in item.options"
                :key="'multiple'+ item.option_id + optionIndex">
             <mu-checkbox :value="optionIndex+''" v-model="multipleAnswer" :label="option.content" style="margin-left:50px"
                         ></mu-checkbox>
+            </div>
+          </template>
+          <template v-if="item.type=='填空'">
+            <span class="que_type">{{item.type}}</span>
+            <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
+            <div class="fill_option">
+              <mu-text-field v-model="fillAnswer" label="填写答案" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
             </div>
           </template>
         </div>
@@ -101,7 +110,7 @@
         multipleQueList: [],
         //多选题答案
         multipleAnswer: [],
-
+        fillAnswer:'',
      
         experiment:{},
         tableData:{},
@@ -145,6 +154,15 @@
                     if(question_now.type=='单选'){
                         that.singleAnswer = 0
                     }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 0){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(0)
+                    }
                 }
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
@@ -153,6 +171,15 @@
                 if(question_now.options.length>=2){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 1
+                    }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 1){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(1)
                     }
                 }
             }
@@ -163,6 +190,15 @@
                     if(question_now.type=='单选'){
                         that.singleAnswer = 2
                     }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 2){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(2)
+                    }
                 }
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
@@ -172,6 +208,15 @@
                     if(question_now.type=='单选'){
                         that.singleAnswer = 3
                     }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 3){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(3)
+                    }
                 }
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
@@ -179,6 +224,15 @@
                 if(question_now.options.length>=5){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 4
+                    }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 4){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(4)
                     }
                 }
             }
@@ -189,6 +243,15 @@
                     if(question_now.type=='单选'){
                         that.singleAnswer = 5
                     }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 5){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(5)
+                    }
                 }
             }
             else if(e1 && e1.keyCode==49+6){ //按键7
@@ -197,6 +260,15 @@
                 if(question_now.options.length>=7){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 6
+                    }
+                    else if(question_now.type=='多选'){
+                        for(var i=0;i<that.multipleAnswer.length;i++){
+                          if(that.multipleAnswers[i] === 6){
+                              that.multipleAnswer.splice(i, 1)
+                              return
+                          }
+                        }
+                        that.multipleAnswer.push(6)
                     }
                 }
             }
@@ -399,6 +471,23 @@
                 this.answer.answer_list[this.current_index] = this.singleAnswer
                 this.singleAnswer = ''
             }
+        }
+        else if(this.tableData.questions[this.current_index].type=='多选'){
+           if(this.multipleAnswer.length===0){
+                Toast({
+                    message: '还没有选择选项',
+                    duration: 1500
+                });
+                return false
+           }else{
+                var answer_question = ''
+                this.answer.answer_list[this.current_index] = this.multipleAnswer.join(';')
+                this.multipleAnswer = []
+            }
+        }
+        else if(this.tableData.questions[this.current_index].type=='填空'){
+          this.answer.answer_list[this.current_index] = this.fillAnswer
+          this.fillAnswer = ''
         }
         return true
       },
