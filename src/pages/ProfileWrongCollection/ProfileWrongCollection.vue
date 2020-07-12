@@ -129,7 +129,25 @@
         }
       },
       toCollectionDetail(test_info){
-        this.$router.push({name:"table",params:{'experiment_id':test_info.experiment_id,'table_id':test_info.table_id,'test_id':test_info.test_id}})
+        this.$store.commit('record_table_list', (test_info.table_id+'').split(';'))
+        this.$store.commit('refresh_table_index', 0)
+        this.$store.commit('record_experiment_id', test_info.experiment_id)
+        this.$store.commit('record_test_id', test_info.test_id)
+        this.$store.commit('refresh_current_index',0)
+        this.$store.commit('record_answer', {
+          table_answer:{
+            answer_list:[],
+            table_ids:test_info.test_id
+            // table_id:0
+          },
+          experiment_answer:{
+            answer_list:[],
+            experiment_id:test_info.experiment_id
+          },
+          video_url:'',
+          test_id:test_info.test_id
+        })
+        this.$router.push({name:"table"})
       }
     },
     components:{

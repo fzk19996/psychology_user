@@ -34,4 +34,10 @@ export const REFRESH_JUDGE_ANSWERS = 'refresh_judge_answers' //刷新从sessionS
 export const REFRESH_FILL_ANSWERS = 'refresh_fill_answers' //刷新从sessionStorage取出放入
 export const REFRESH_FIRST_CURRENT_TIME = 'refresh_first_current_time' //刷新从sessionStorage取出放入
 
+export const REFRESH_TABLE_INDEX = "refresh_table_index"
+export const REFRESH_EXPERIMENT_iNDEX = "refresh_experiment_index"
+export const RECORD_TABLE_ANSWER = "record_table_answer"
+export const RECORD_EXPERIMENT_ANSWER = "record_experiment_answer"
+export const RECORD_TABLE_LIST = "record_table_list"
+export const RECORD_EXPERIMENT_list = "record_experiment_list"
 

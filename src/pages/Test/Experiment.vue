@@ -21,7 +21,7 @@
     <!--时间提醒和当前题数-->
     <div class="paper_sub_title_second">
       <span class="paper_clock"><i class="iconfont iconjishiqi"></i>{{restTime}}</span>
-      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{currentIndex + 1}}/{{queNumInfo.totalNum}}</span>
+      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{current_index  + 1}}/{{experimentData.questions.length}}</span>
     </div>
 
     <!--考卷进度条提醒-->
@@ -166,9 +166,9 @@
       //   text: '加载中...',
       //   spinnerType: 'fading-circle'
       // });
-      this.experiment_id = this.$route.params.experiment_id
+      this.experiment_id = this.$store.state.experiment_id
       this.getExperimentInfo(this.experiment_id)
-      this.test_id = this.$route.params.test_id
+      this.test_id = this.$store.state.test_id
       var that = this;
       document.onkeydown = function(e) {
             //事件对象兼容
@@ -335,12 +335,13 @@
         let experiment_answer = JSON.parse(sessionStorage.getItem('experiment_answer'))
         experiment_answer.experiment_id = this.experiment_id
         // MessageBox.confirm('确定要提交试卷吗?').then(action => {
-          let res = await addAnswer({
-            'table_answer':table_answer,
-            'experiment_answer':experiment_answer,
-            'test_id': this.test_id,
-            'video_url':this.video_url
-          })
+          // let res = await addAnswer({
+          //   'table_answer':table_answer,
+          //   'experiment_answer':experiment_answer,
+          //   'test_id': this.test_id,
+          //   'video_url':this.video_url
+          // })
+          let res = await addAnswer(this.$store.state.answer)
           console.log('提交试卷得到结果')
           console.log(res)
           if (res.status==200){
@@ -369,12 +370,12 @@
       //最终提交答案，包含用户手动点击提交按钮和到时自动提交
       async handleSubmit() {
         let tableAnswer = JSON.parse(sessionStorage.getItem('table_answer'))
-        let result = await addAnswer({
-          'table_answer_list':tableAnswer,
-          'experiment_answer_list':this.experimentAnswer,
-          'test_id': this.test_id,
-          'video_url':this.video_url
-        })
+        // let result = await addAnswer({
+        //   'table_answer_list':tableAnswer,
+        //   'experiment_answer_list':this.experimentAnswer,
+        //   'test_id': this.test_id,
+        //   'video_url':this.video_url
+        // })
         return result
 
       },
@@ -393,9 +394,11 @@
         })
       },
       setAnswer(){
+        var answer = this.$store.state.answer
+        var tmp = JSON.parse(JSON.stringify(this.answer_template))
         if(this.experimentData.questions[this.current_index].time_limit!=0){
             clearInterval(this.timer)
-            this.answer.answer_list[this.current_index].time_use = new Date().getTime() - this.start_question_time
+            tmp.time_use = new Date().getTime() - this.start_question_time
             console.log(this.fillAnswer)
             if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
@@ -407,14 +410,16 @@
             }
             if(this.experimentData.questions[this.current_index].type.indexOf('按键反应')>=0){
                 if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
-                    this.answer.answer_list[this.current_index].correct = 0
+                    tmp.correct = 0
                 }else{
-                    this.answer.answer_list[this.current_index].correct = 1
+                    tmp.correct = 1
                 }
             }
         }
-        this.answer.answer_list[this.current_index].answer = this.fillAnswer
-        this.answer.answer_list[this.current_index].question_id = this.experimentData.questions[this.current_index].question_id
+        tmp.answer = this.fillAnswer
+        tmp.question_id = this.experimentData.questions[this.current_index].question_id
+        answer.experiment_answer.answer_list.push(tmp)
+        this.$store.commit('record_answer', answer)
         return true
       },
 

@@ -9,5 +9,7 @@ export default {
       state.judgeAnswers.filter(item => item).length +
       state.fillAnswers.filter(item => item).length
   },
-  unreadMsgCount: state => state.unreadMsgCount
+  unreadMsgCount: state => state.unreadMsgCount,
+  getTableList: state => state.tableList,
+  getTableIndex: state => state.tableIndex
 }

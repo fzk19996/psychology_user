@@ -30,10 +30,26 @@ import {
   REFRESH_MULTIPLE_ANSWERS,
   REFRESH_JUDGE_ANSWERS,
   REFRESH_FILL_ANSWERS,
-  REFRESH_FIRST_CURRENT_TIME
+  REFRESH_FIRST_CURRENT_TIME,
+  // REFRESH_TABLE_INDEX,
+  // REFRESH_EXPERIMENT_iNDEX,
+  // RECORD_TABLE_ANSWER,
+  // RECORD_EXPERIMENT_ANSWER,
+  // RECORD_TABLE_LIST,
+  // RECORD_EXPERIMENT_LIST
 } from "./mutation-types";
 // [方法名](state,{param}){}
 export default {
+  refresh_table_index(state, {index}){
+    state.tableIndex = index
+  },
+  refresh_experiment_index(state, {index}){
+    state.experimentIndex = index
+  },
+  record_table_list(state, {tableList}){
+    state.tableList = tableList
+  },
+  
   [RECEIVE_ROTATION_IMAGES] (state, {rotationImages}){
     state.rotationImages = rotationImages;
   },

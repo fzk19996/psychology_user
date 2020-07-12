@@ -22,7 +22,7 @@
     <template v-if="JSON.stringify(tableData)!=='{}'">
     <div class="paper_sub_title_second">
       <span class="paper_clock"><i class="iconfont iconjishiqi"></i></span>
-      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{currentIndex + 1}}/{{tableData.questions.length}}</span>
+      <span class="paper_statistics"><i class="iconfont icontongji"></i>量表个数：{{tableIndex+1}}/{{tableNum}}&nbsp题目个数：{{current_index+1}}/{{tableData.questions.length}}</span>
     </div>
     </template>
 
@@ -101,6 +101,11 @@
             table_id:''
         },
 
+        answer_template:{
+          question_id: '',
+          answer:''
+        },
+
         //单选题数组
         singleQueList: [],
         //单选题答案
@@ -114,7 +119,9 @@
      
         experiment:{},
         tableData:{},
-        current_index:0 
+        current_index:0 ,
+        tableIndex: 0,
+        tableNum:this.$store.state.tableList.length
       }
     },
     computed:{
@@ -124,7 +131,9 @@
         'multipleAnswers',
         'judgeAnswers',
         'fillAnswers',
-        'firstCurrentTime'
+        'firstCurrentTime',
+        'tableList',
+        'tableIndex'
       ]),
       ...mapGetters(['completeNumber'])
     },
@@ -134,13 +143,13 @@
       //   text: '加载中...',
       //   spinnerType: 'fading-circle'
       // });
-      this.table_id = this.$route.params.table_id
-      this.experiment_id = this.$route.params.experiment_id
-      this.test_id = this.$route.params.test_id
-      if(this.table_id === ''){
-         this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
-      }
-
+      // this.table_id = this.$route.params.table_id
+      // this.experiment_id = this.$route.params.experiment_id
+      // this.test_id = this.$route.params.test_id
+      // if(this.table_id === ''){
+      //    this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
+      // }
+      this.table_id = this.$store.state.tableList[this.$store.state.tableIndex]
       this.getTableInfo()
       var that = this;
       document.onkeydown = function(e) {
@@ -279,11 +288,23 @@
                     sessionStorage.setItem('table_answer',JSON.stringify(that.answer))
                     if(that.current_index<that.tableData.questions.length-1){
                         that.current_index += 1
+                        that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
+                        // that.$store.commit('refresh_current_index', 10)
+                        console.log('加了数据')
                     }else{
-                        console.log('跳转到实验页面')
-                        that.$router.push({name:"experiment",params:{'experiment_id':that.experiment_id,'test_id':that.test_id}})
+                        if(that.$store.state.tableIndex<(that.$store.state.tableList.length-1)){
+                          console.log('加载table')
+                          that.tableIndex += 1
+                          that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
+                          that.$store.commit('refresh_table_index', (that.$store.state.table_index+1))
+                          that.table_id = that.$store.state.tableList[that.$store.state.tableIndex]
+                          that.getTableInfo()
+                          
+                        }else{
+                          console.log('跳转到实验页面')
+                          that.$router.push({name:"experiment",params:{'experiment_id':that.experiment_id,'test_id':that.test_id}})
+                        }
                     }
-                    console.log(that.current_index)
                 } 
             }
 
@@ -328,50 +349,10 @@
       },
 
 
-      nextTableQuestion(){
-        if(this.current_index_t>=0){
-          if(!this.setAnswer())
-             return
-        }
-        this.current_index_t += 1
-        console.log(this.table_index)
-        console.log(this.current_index_t)
-      },
-
-      nextTable(){
-        if(this.setAnswer()){
-          console.log('被点击了')
-          this.table_index += 1
-          if(this.table_index>=this.tableList.length)
-            this.is_experiment = true
-        }
-      },
-
-      nextExperimentQuestion(){
-        if(this.current_index_e>=0 && !this.setAnswer())
-          return
-        this.current_index_e += 1
-        this.start_question_time = new Date().getTime()
-        // if(this.current_index_e-1>=0){
-        //   if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
-        //       ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
-        //       ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
-        //       ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'
-        //       ||this.experiment.questions[this.current_index_e].type=='记忆测验'){
-        //   }
-        // }
-        if(this.experiment.questions[this.current_index_e].type=='奖励按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='惩罚按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='无反馈按键反应'
-            ||this.experiment.questions[this.current_index_e].type=='根据要求说出词语'){
-            this.time_use = 0
-            this.timer = setInterval(this.start_timer, 1000)
-        }
-      },
-
 
     async getTableInfo(){
       // console.log(this.testId)
+      this.current_index = 0
       let result = await getTableById({table_id:this.table_id})
       if(result.status==200){
         console.log('量表数据')
@@ -460,6 +441,7 @@
         })
       },
       setAnswer(){
+        var answer_final = ''
         if(this.tableData.questions[this.current_index].type=='单选'){
             if(this.singleAnswer===''){
                 Toast({
@@ -468,7 +450,8 @@
                 });
                 return false
             }else{
-                this.answer.answer_list[this.current_index] = this.singleAnswer
+                answer_final = this.singleAnswer
+                // this.answer.answer_list[this.current_index] = this.singleAnswer
                 this.singleAnswer = ''
             }
         }
@@ -480,15 +463,29 @@
                 });
                 return false
            }else{
-                var answer_question = ''
-                this.answer.answer_list[this.current_index] = this.multipleAnswer.join(';')
+                answer_final = this.multipleAnswer.join(';')
+                // this.answer.answer_list[this.current_index] = this.multipleAnswer.join(';')
                 this.multipleAnswer = []
             }
         }
         else if(this.tableData.questions[this.current_index].type=='填空'){
-          this.answer.answer_list[this.current_index] = this.fillAnswer
+          // this.answer.answer_list[this.current_index] = this.fillAnswer
+          answer_final = this.fillAnswer
           this.fillAnswer = ''
         }
+        var answer = this.$store.state.answer
+        var tmp = JSON.parse(JSON.stringify(this.answer_template))
+        tmp.question_id = this.tableData.questions[this.current_index].question_id
+        tmp.answer = answer_final
+        console.log(this.$store.state.current_index)
+        if(this.$store.state.current_index>=this.$store.state.answer.table_answer.answer_list.length){
+          answer.table_answer.answer_list.push(tmp)
+        }else{
+          console.log('没有推数据')
+          console.log(this.$store.state.current_index)
+          answer.table_answer.answer_list[this.$store.state.current_index] = tmp
+        }
+        this.$store.commit('record_answer', answer)
         return true
       },
 
@@ -500,7 +497,7 @@
         }
         if (!isLt1000M) {
           this.$message.error('上传视频大小不能超过1000MB哦!');
-          return false;
+          return false
         }
         this.isShowUploadVideo = false;
       },

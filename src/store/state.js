@@ -15,4 +15,10 @@ export default {
   judgeAnswers: [],//判断题答案数组
   fillAnswers: [],//填空题答案数组
   firstCurrentTime:0,//花费时间
+  experimentAnswer:[],
+  tableAnswer:[],
+  tableIndex:0,
+  experimentIndex:0,
+  experimentList:[],
+  tableList:[]
 }
