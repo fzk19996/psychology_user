@@ -292,11 +292,12 @@
                         // that.$store.commit('refresh_current_index', 10)
                         console.log('加了数据')
                     }else{
+                        console.log('table的index：'+that.$store.state.tableIndex)
                         if(that.$store.state.tableIndex<(that.$store.state.tableList.length-1)){
                           console.log('加载table')
                           that.tableIndex += 1
                           that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
-                          that.$store.commit('refresh_table_index', (that.$store.state.table_index+1))
+                          that.$store.commit('refresh_table_index', (that.$store.state.tableIndex+1))
                           that.table_id = that.$store.state.tableList[that.$store.state.tableIndex]
                           that.getTableInfo()
                           
@@ -470,6 +471,13 @@
         }
         else if(this.tableData.questions[this.current_index].type=='填空'){
           // this.answer.answer_list[this.current_index] = this.fillAnswer
+          if(this.fillAnswer.length==0){
+              Toast({
+                message: '还没有填空',
+                duration: 1500
+              });
+              return false
+          }
           answer_final = this.fillAnswer
           this.fillAnswer = ''
         }
