@@ -55,11 +55,14 @@
           <template v-if="item.type=='多选'">
             <span class="que_type">{{item.type}}</span>
             <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
-            <div class="multiple_option" v-for="(option, optionIndex) in item.options"
+            <!-- <div class="multiple_option" v-for="(option, optionIndex) in item.options"
                :key="'multiple'+ item.option_id + optionIndex">
             <mu-checkbox :value="optionIndex+''" v-model="multipleAnswer" :label="option.content" style="margin-left:50px"
                         ></mu-checkbox>
-            </div>
+            </div> -->
+            <el-checkbox-group v-model="multipleAnswer">
+              <el-checkbox  :label="option_index" :key="option_index" v-for="(option, option_index) in item.options">{{option.content}}</el-checkbox>
+            </el-checkbox-group>
           </template>
           <template v-if="item.type=='填空'">
             <span class="que_type">{{item.type}}</span>
@@ -164,8 +167,9 @@
                         that.singleAnswer = 0
                     }
                     else if(question_now.type=='多选'){
+                        console.log(that.multipleAnswer)
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 0){
+                          if(that.multipleAnswer[i] === 0){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -183,7 +187,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 1){
+                          if(that.multipleAnswer[i] === 1){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -201,7 +205,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 2){
+                          if(that.multipleAnswer[i] === 2){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -219,7 +223,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 3){
+                          if(that.multipleAnswer[i] === 3){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -236,7 +240,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 4){
+                          if(that.multipleAnswer[i] === 4){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -254,7 +258,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 5){
+                          if(that.multipleAnswer[i] === 5){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
@@ -272,7 +276,7 @@
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
-                          if(that.multipleAnswers[i] === 6){
+                          if(that.multipleAnswer[i] === 6){
                               that.multipleAnswer.splice(i, 1)
                               return
                           }
