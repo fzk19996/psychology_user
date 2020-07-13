@@ -234,7 +234,7 @@
             else if(e1 && e1.keyCode==49+8){ //按键9
                 var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
-                    that.fillAnswer = '0'
+                    that.fillAnswer = '9'
                     that.nextQuestion()
                 }
             }
