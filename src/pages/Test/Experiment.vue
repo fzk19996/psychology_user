@@ -177,35 +177,35 @@
             //左
             if(e1 && e1.keyCode==49+0){ //按键1
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作模板2'){
                     that.fillAnswer = '1'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作模板2'){
                     that.fillAnswer = '2'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+2){ //按键3
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
                     that.fillAnswer = '3'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
                     that.fillAnswer = '4'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
                     that.fillAnswer = '5'
                     that.nextQuestion()
                 }
@@ -402,11 +402,21 @@
             console.log(this.fillAnswer)
             if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
-                  this.$message.success('回答正确')
+                  //  Toast({
+                  //     message: "回答正确",
+                  //     duration: 2000
+                  //   });
+                  // this.sleep(5000)
+                  alert("回答正确")
             }
             else if(this.experimentData.questions[this.current_index].type=='惩罚按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer !== this.fillAnswer){
-                  this.$message.error('回答错误')
+                  // Toast({
+                  //     message: "回答错误",
+                  //     duration: 2000
+                  // });
+                  // this.sleep(5000)
+                  alert("回答错误")
             }
             if(this.experimentData.questions[this.current_index].type.indexOf('按键反应')>=0){
                 if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
@@ -422,11 +432,20 @@
         this.$store.commit('record_answer', answer)
         return true
       },
+      sleep(numberMillis) { 
+        var now = new Date(); 
+        var exitTime = now.getTime() + numberMillis; 
+        while (true) { 
+          now = new Date(); 
+          if (now.getTime() > exitTime) 
+            return; 
+        } 
+      },
 
       beforeUploadVideo (file) {
         const isLt1000M = file.size / 1024 / 1024 < 1000;
-        if (['video/mp4'].indexOf(file.type)==-1&&['video/avi'].indexOf(file.type)==-1&&['video/mp3'].indexOf(file.type) == -1) { //'video/ogg', 'video/flv', 'video/avi', 'video/wmv', 'video/rmvb'
-          this.$message.error('请上传正确的视频格式');
+        if (!/\.(wav|m4a|mp4)$/.test(file.name)) { //'video/ogg', 'video/flv', 'video/avi', 'video/wmv', 'video/rmvb'
+          this.$message.error('请上传正确的音频格式');
           return false;
         }
         if (!isLt1000M) {
