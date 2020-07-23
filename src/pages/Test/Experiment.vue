@@ -402,21 +402,21 @@
             console.log(this.fillAnswer)
             if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
-                  //  Toast({
-                  //     message: "回答正确",
-                  //     duration: 2000
-                  //   });
+                   Toast({
+                      message: "回答正确",
+                      duration: 2000
+                    });
                   // this.sleep(5000)
-                  alert("回答正确")
+                  // alert("回答正确")
             }
             else if(this.experimentData.questions[this.current_index].type=='惩罚按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer !== this.fillAnswer){
-                  // Toast({
-                  //     message: "回答错误",
-                  //     duration: 2000
-                  // });
+                  Toast({
+                      message: "回答错误",
+                      duration: 2000
+                  });
                   // this.sleep(5000)
-                  alert("回答错误")
+                  // alert("回答错误")
             }
             if(this.experimentData.questions[this.current_index].type.indexOf('按键反应')>=0){
                 if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){

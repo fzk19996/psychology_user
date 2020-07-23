@@ -299,11 +299,11 @@
                         console.log('table的index：'+that.$store.state.tableIndex)
                         if(that.$store.state.tableIndex<(that.$store.state.tableList.length-1)){
                           console.log('加载table')
-                          that.tableIndex += 1
                           that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
                           that.$store.commit('refresh_table_index', (that.$store.state.tableIndex+1))
                           that.table_id = that.$store.state.tableList[that.$store.state.tableIndex]
                           that.getTableInfo()
+                          that.tableIndex += 1
                           
                         }else{
                           console.log('跳转到实验页面')
@@ -357,19 +357,19 @@
 
     async getTableInfo(){
       // console.log(this.testId)
-      this.current_index = 0
       let result = await getTableById({table_id:this.table_id})
       if(result.status==200){
         console.log('量表数据')
         this.tableData = result.data
         console.log(this.tableData)
         for(var i=0;i<this.tableData.questions.length;i++){
-            this.answer.answer_list.push('')
+          this.answer.answer_list.push('')
         }
         this.answer.table_id = this.table_id
+        this.current_index = 0
       }else{
         Toast({
-            message: result.msg,
+          message: result.msg,
             duration: 2000
         });
         this.$router.replace('/profile')
