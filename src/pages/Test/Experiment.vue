@@ -177,35 +177,35 @@
             //左
             if(e1 && e1.keyCode==49+0){ //按键1
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作模板2'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '1'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作模板2'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '2'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+2){ //按键3
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '3'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '4'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作模板2'){
+                if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '5'
                     that.nextQuestion()
                 }
@@ -240,7 +240,7 @@
             }
             else if(e1 && e1.keyCode==13){
                 var question_now = that.experimentData.questions[that.current_index]
-                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'&&question_now.type!='工作记忆模板'){
+                if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'&&question_now.type!='工作记忆模板'&&question_now.type!='工作记忆模板2'){
                     console.log('下一题')
                     that.nextQuestion()
                 }
