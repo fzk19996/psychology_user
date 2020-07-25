@@ -98,11 +98,7 @@
     data() {
       return {
         
-        answer:{
-            answer_list:[],
-            current_index:0,
-            table_id:''
-        },
+        answer_list:[],
 
         answer_template:{
           question_id: '',
@@ -167,7 +163,7 @@
                         that.singleAnswer = 0
                     }
                     else if(question_now.type=='多选'){
-                        console.log(that.multipleAnswer)
+                        // console.log(that.multipleAnswer)
                         for(var i=0;i<that.multipleAnswer.length;i++){
                           if(that.multipleAnswer[i] === 0){
                               that.multipleAnswer.splice(i, 1)
@@ -180,7 +176,7 @@
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
                 var question_now = that.tableData.questions[that.current_index]
-                console.log(question_now)
+                // console.log(question_now)
                 if(question_now.options.length>=2){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 1
@@ -198,7 +194,7 @@
             }
             else if(e1 && e1.keyCode==49+2){ //按键3
                 var question_now = that.tableData.questions[that.current_index]
-                console.log(question_now)
+                // console.log(question_now)
                 if(question_now.options.length>=3){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 2
@@ -216,7 +212,7 @@
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
                 var question_now = that.tableData.questions[that.current_index]
-                console.log(question_now)
+                // console.log(question_now)
                 if(question_now.options.length>=4){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 3
@@ -251,7 +247,7 @@
             }
             else if(e1 && e1.keyCode==49+5){ //按键6
                 var question_now = that.tableData.questions[that.current_index]
-                console.log(question_now)
+                // console.log(question_now)
                 if(question_now.options.length>=6){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 5
@@ -269,7 +265,7 @@
             }
             else if(e1 && e1.keyCode==49+6){ //按键7
                 var question_now = that.tableData.questions[that.current_index]
-                console.log(question_now)
+                // console.log(question_now)
                 if(question_now.options.length>=7){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 6
@@ -287,18 +283,21 @@
             }
             else if(e1 && e1.keyCode==13){
                 if(that.setAnswer()==true){
-                    that.answer.current_index += 1
-                    that.answer.table_id = that.table_id
-                    sessionStorage.setItem('table_answer',JSON.stringify(that.answer))
+                    // that.answer.current_index += 1
+                    // that.answer.table_id = that.table_id
+                    // sessionStorage.setItem('table_answer',JSON.stringify(that.answer))
                     if(that.current_index<that.tableData.questions.length-1){
                         that.current_index += 1
                         that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
                         // that.$store.commit('refresh_current_index', 10)
-                        console.log('加了数据')
+                        // console.log('加了数据')
                     }else{
                         console.log('table的index：'+that.$store.state.tableIndex)
+                        var answer = that.$store.state.answer
+                        answer.table_answer.answer_list = answer.table_answer.answer_list.concat(that.answer_list)
+                        that.$store.commit('record_answer', answer)
                         if(that.$store.state.tableIndex<(that.$store.state.tableList.length-1)){
-                          console.log('加载table')
+                          // console.log('加载table')
                           that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
                           that.$store.commit('refresh_table_index', (that.$store.state.tableIndex+1))
                           that.table_id = that.$store.state.tableList[that.$store.state.tableIndex]
@@ -359,13 +358,14 @@
       // console.log(this.testId)
       let result = await getTableById({table_id:this.table_id})
       if(result.status==200){
-        console.log('量表数据')
+        // console.log('量表数据')
         this.tableData = result.data
-        console.log(this.tableData)
+        // console.log(this.tableData)
+        this.answer_list = []
         for(var i=0;i<this.tableData.questions.length;i++){
-          this.answer.answer_list.push('')
+          this.answer_list.push({})
         }
-        this.answer.table_id = this.table_id
+        // this.answer.table_id = this.table_id
         this.current_index = 0
       }else{
         Toast({
@@ -485,19 +485,21 @@
           answer_final = this.fillAnswer
           this.fillAnswer = ''
         }
-        var answer = this.$store.state.answer
+        // var answer = this.$store.state.answer
         var tmp = JSON.parse(JSON.stringify(this.answer_template))
         tmp.question_id = this.tableData.questions[this.current_index].question_id
         tmp.answer = answer_final
-        console.log(this.$store.state.current_index)
-        if(this.$store.state.current_index>=this.$store.state.answer.table_answer.answer_list.length){
-          answer.table_answer.answer_list.push(tmp)
-        }else{
-          console.log('没有推数据')
-          console.log(this.$store.state.current_index)
-          answer.table_answer.answer_list[this.$store.state.current_index] = tmp
-        }
-        this.$store.commit('record_answer', answer)
+        // console.log(this.$store.state.current_index)
+        // if(this.$store.state.current_index>=this.$store.state.answer.table_answer.answer_list.length){
+        //   answer.table_answer.answer_list.push(tmp)
+        // }else{
+        //   console.log('没有推数据')
+        //   alert("出现问题了")
+        //   // console.log(this.$store.state.current_index)
+        //   answer.table_answer.answer_list[this.$store.state.current_index] = tmp
+        // }
+        this.answer_list[this.current_index] = tmp
+        // this.$store.commit('record_answer', answer)
         return true
       },
 
