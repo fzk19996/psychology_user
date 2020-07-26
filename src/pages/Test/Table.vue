@@ -158,6 +158,8 @@
             //左
             if(e1 && e1.keyCode==49+0){ //按键1
                 var question_now = that.tableData.questions[that.current_index]
+                if(question_now.type=='填空')
+                  return
                 if(question_now.options.length>=1){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 0
@@ -177,6 +179,8 @@
             else if(e1 && e1.keyCode==49+1){ //按键2
                 var question_now = that.tableData.questions[that.current_index]
                 // console.log(question_now)
+                if(question_now.type=='填空')
+                  return
                 if(question_now.options.length>=2){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 1
@@ -195,6 +199,8 @@
             else if(e1 && e1.keyCode==49+2){ //按键3
                 var question_now = that.tableData.questions[that.current_index]
                 // console.log(question_now)
+                if(question_now.type=='填空')
+                  return
                 if(question_now.options.length>=3){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 2
@@ -213,6 +219,8 @@
             else if(e1 && e1.keyCode==49+3){ //按键4
                 var question_now = that.tableData.questions[that.current_index]
                 // console.log(question_now)
+                if(question_now.type=='填空')
+                  return
                 if(question_now.options.length>=4){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 3
@@ -230,6 +238,8 @@
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
                 var question_now = that.tableData.questions[that.current_index]
+                if(question_now.type=='填空')
+                  return
                 if(question_now.options.length>=5){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 4
@@ -247,6 +257,8 @@
             }
             else if(e1 && e1.keyCode==49+5){ //按键6
                 var question_now = that.tableData.questions[that.current_index]
+                if(question_now.type=='填空')
+                  return
                 // console.log(question_now)
                 if(question_now.options.length>=6){
                     if(question_now.type=='单选'){
@@ -265,6 +277,8 @@
             }
             else if(e1 && e1.keyCode==49+6){ //按键7
                 var question_now = that.tableData.questions[that.current_index]
+                if(question_now.type=='填空')
+                  return
                 // console.log(question_now)
                 if(question_now.options.length>=7){
                     if(question_now.type=='单选'){
