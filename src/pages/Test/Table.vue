@@ -149,6 +149,7 @@
       //    this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
       // }
       this.table_id = this.$store.state.tableList[this.$store.state.tableIndex]
+      this.answer_list = []
       this.getTableInfo()
       var that = this;
       document.onkeydown = function(e) {
@@ -307,9 +308,10 @@
                         // console.log('加了数据')
                     }else{
                         console.log('table的index：'+that.$store.state.tableIndex)
-                        var answer = that.$store.state.answer
-                        answer.table_answer.answer_list = answer.table_answer.answer_list.concat(that.answer_list)
-                        that.$store.commit('record_answer', answer)
+                        console.log(that.answer_list)
+                        // var answer = that.$store.state.answer
+                        // answer.table_answer.answer_list = answer.table_answer.answer_list.concat(that.answer_list)
+                        // that.$store.commit('record_answer', answer)
                         if(that.$store.state.tableIndex<(that.$store.state.tableList.length-1)){
                           // console.log('加载table')
                           that.$store.commit('refresh_current_index', (that.$store.state.current_index+1))
@@ -319,6 +321,9 @@
                           that.tableIndex += 1
                           
                         }else{
+                          var answer = that.$store.state.answer
+                          answer.table_answer.answer_list = that.answer_list
+                          that.$store.commit('record_answer', answer)
                           console.log('跳转到实验页面')
                           that.$router.push({name:"experiment",params:{'experiment_id':that.experiment_id,'test_id':that.test_id}})
                         }
@@ -375,10 +380,10 @@
         // console.log('量表数据')
         this.tableData = result.data
         // console.log(this.tableData)
-        this.answer_list = []
-        for(var i=0;i<this.tableData.questions.length;i++){
-          this.answer_list.push({})
-        }
+        // this.answer_list = []
+        // for(var i=0;i<this.tableData.questions.length;i++){
+        //   this.answer_list.push({})
+        // }
         // this.answer.table_id = this.table_id
         this.current_index = 0
       }else{
@@ -512,7 +517,7 @@
         //   // console.log(this.$store.state.current_index)
         //   answer.table_answer.answer_list[this.$store.state.current_index] = tmp
         // }
-        this.answer_list[this.current_index] = tmp
+        this.answer_list.push(tmp)
         // this.$store.commit('record_answer', answer)
         return true
       },
