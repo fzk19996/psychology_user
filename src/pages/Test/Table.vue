@@ -22,7 +22,7 @@
     <template v-if="JSON.stringify(tableData)!=='{}'">
     <div class="paper_sub_title_second">
       <span class="paper_clock"><i class="iconfont iconjishiqi"></i></span>
-      <span class="paper_statistics"><i class="iconfont icontongji"></i>量表个数：{{tableIndex+1}}/{{tableNum}}&nbsp题目个数：{{current_index+1}}/{{tableData.questions.length}}</span>
+      <span class="paper_statistics"><i class="iconfont icontongji"></i>量表个数：{{$store.state.tableIndex+1}}/{{tableNum}}&nbsp题目个数：{{current_index+1}}/{{tableData.questions.length}}</span>
     </div>
     </template>
 
@@ -119,8 +119,10 @@
         experiment:{},
         tableData:{},
         current_index:0 ,
-        tableIndex: 0,
-        tableNum:this.$store.state.tableList.length
+        //tableIndex: 0,
+        tableNum:this.$store.state.tableList.length,
+
+        isloading:false
       }
     },
     computed:{
@@ -157,6 +159,10 @@
             let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
             //键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
             //左
+            if(this.isloading){
+              console.log('正在加载，不能按键')
+              return
+            }
             if(e1 && e1.keyCode==49+0){ //按键1
                 var question_now = that.tableData.questions[that.current_index]
                 if(question_now.type=='填空')
@@ -375,6 +381,8 @@
 
     async getTableInfo(){
       // console.log(this.testId)
+      $("loading").show();
+      this.isloading = true
       let result = await getTableById({table_id:this.table_id})
       if(result.status==200){
         // console.log('量表数据')
@@ -386,6 +394,7 @@
         // }
         // this.answer.table_id = this.table_id
         this.current_index = 0
+        this.isloading = false
       }else{
         Toast({
           message: result.msg,
