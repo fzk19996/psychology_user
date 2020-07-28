@@ -43,7 +43,7 @@
                v-show="index == current_index">
         <div class="content">
           <template v-if="item.type=='单选'">
-            <span class="que_type">{{item.type}}</span>
+            <!-- <span class="que_type">{{item.type}}</span> -->
             <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <div v-for="(option, optionIndex) in item.options"
                 :key="'single'+ item.option_id + optionIndex">
@@ -53,7 +53,7 @@
             </div>
           </template>
           <template v-if="item.type=='多选'">
-            <span class="que_type">{{item.type}}</span>
+            <!-- <span class="que_type">{{item.type}}</span> -->
             <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <!-- <div class="multiple_option" v-for="(option, optionIndex) in item.options"
                :key="'multiple'+ item.option_id + optionIndex">
@@ -65,7 +65,7 @@
             </el-checkbox-group>
           </template>
           <template v-if="item.type=='填空'">
-            <span class="que_type">{{item.type}}</span>
+            <!-- <span class="que_type">{{item.type}}</span> -->
             <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <div class="fill_option">
               <mu-text-field v-model="fillAnswer" label="填写答案" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>

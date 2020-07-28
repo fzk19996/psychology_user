@@ -39,7 +39,7 @@
       <section class="que" v-for="(item, index) in experimentData.questions" :key="index"
                v-show="index == current_index">
         <div class="content">
-          <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{question_index}}</template>.&nbsp;[{{item.type}}]{{item.question}}</span>
+          <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{question_index}}</template>.&nbsp;{{item.question}}</span>
           <template v-if="item.type==='注视点'||item.type=='指导语'||item.type.indexOf('按键反应'>=0)||item.type=='看图回答问题'||item.type=='根据要求说出词语'">
               <img v-if="item.pic_url!==''" :src="item.pic_url" height="600" width="1200"></img>
           </template>
@@ -64,6 +64,12 @@
       </div>
 
     </div>
+    <el-dialog title="修改用户信息" :visible.sync="errorDialog">
+      <div style="color:red">按键错误</div>
+    </el-dialog>
+    <el-dialog title="修改用户信息" :visible.sync="rightDialog">
+      <div style="color:blue">按键正确</div>
+    </el-dialog>
 
    
 
@@ -146,7 +152,10 @@
         current_index:0,
         experiment_id:'',
         experimentData:{},
-        question_index:1
+        question_index:1,
+        rightDialog:false,
+        errorDialog:false,
+        key_effect:true
       }
     },
     computed:{
@@ -171,6 +180,11 @@
       this.test_id = this.$store.state.test_id
       var that = this;
       document.onkeydown = function(e) {
+            console.log(that.key_effect)
+            if(that.key_effect==false){
+              console.log('按键无效')
+              return
+            }
             //事件对象兼容
             let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
             //键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
@@ -279,19 +293,24 @@
         if(this.current_index<this.experimentData.questions.length-1){
             if(!this.setAnswer())
                 return
-            this.answer.current_index += 1
-            sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
-            if(this.experimentData.questions[this.current_index].type!='指导语'||this.experimentData.questions[this.current_index].type!='注视点'){
-                this.question_index += 1
-            }
-            this.current_index += 1
-            this.start_question_time = new Date().getTime()
-            // }
-            if(this.experimentData.questions[this.current_index].time_limit!=0){
-                this.time_use = 0
-                this.timer = setInterval(this.start_timer, 1000)
-            }
         }
+      },
+
+      nextQuestion2(){
+        if(this.current_index<this.experimentData.questions.length-1){
+          this.answer.current_index += 1
+          sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
+          if(this.experimentData.questions[this.current_index].type!='指导语'||this.experimentData.questions[this.current_index].type!='注视点'){
+            this.question_index += 1
+          }
+          this.current_index += 1
+          this.start_question_time = new Date().getTime()
+          if(this.experimentData.questions[this.current_index].time_limit!=0){
+            this.time_use = 0
+            this.timer = setInterval(this.start_timer, 1000)
+          }
+        }
+        this.key_effect = true
       },
 
 
@@ -341,6 +360,8 @@
           //   'test_id': this.test_id,
           //   'video_url':this.video_url
           // })
+          var answer = this.$store.state.answer
+          answer.video_url = this.video_url
           let res = await addAnswer(this.$store.state.answer)
           console.log('提交试卷得到结果')
           console.log(res)
@@ -393,7 +414,13 @@
           //点击取消按钮操作
         })
       },
-      setAnswer(){
+
+      sleep(ms){
+        return new Promise((resolve)=>setTimeout(resolve,ms));
+      },
+
+      async setAnswer(){
+        this.key_effect = false
         var answer = this.$store.state.answer
         var tmp = JSON.parse(JSON.stringify(this.answer_template))
         if(this.experimentData.questions[this.current_index].time_limit!=0){
@@ -402,11 +429,24 @@
             console.log(this.fillAnswer)
             if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
                 && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
-                   Toast({
+                    Toast({
                       message: "回答正确",
                       duration: 2000
                     });
-                  // this.sleep(5000)
+                    let _this = this
+                    setTimeout(function()  {
+                      tmp.answer = _this.fillAnswer
+                      tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
+                      tmp.correct = 1
+                      answer.experiment_answer.answer_list.push(tmp)
+                      _this.$store.commit('record_answer', answer)
+                      _this.nextQuestion2()
+                    }, 2000);
+                    return
+                    // this.rightDialog = true
+                    // await this.sleep(2000);
+                    // this.rightDialog = false
+                    // this.errorVisble = false
                   // alert("回答正确")
             }
             else if(this.experimentData.questions[this.current_index].type=='惩罚按键反应' 
@@ -415,6 +455,17 @@
                       message: "回答错误",
                       duration: 2000
                   });
+                  let _this = this
+                    setTimeout(function()  {
+                      tmp.answer = _this.fillAnswer
+                      tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
+                      tmp.correct = 0
+                      answer.experiment_answer.answer_list.push(tmp)
+                      _this.$store.commit('record_answer', answer)
+                      _this.nextQuestion2()
+                    }, 2000);
+                    return 
+                  // var temple=await this.sleep(2000)
                   // this.sleep(5000)
                   // alert("回答错误")
             }
@@ -430,6 +481,7 @@
         tmp.question_id = this.experimentData.questions[this.current_index].question_id
         answer.experiment_answer.answer_list.push(tmp)
         this.$store.commit('record_answer', answer)
+        this.nextQuestion2()
         return true
       },
       sleep(numberMillis) { 
