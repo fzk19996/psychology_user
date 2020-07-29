@@ -477,6 +477,14 @@
                 }
             }
         }
+        if(this.experimentData.questions[this.current_index].type.indexOf('工作记忆模板')>=0){
+          if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
+            tmp.correct = 0
+          }else{
+            tmp.correct = 1
+          }
+          tmp.time_use = new Date().getTime() - this.start_question_time
+        }
         tmp.answer = this.fillAnswer
         tmp.question_id = this.experimentData.questions[this.current_index].question_id
         answer.experiment_answer.answer_list.push(tmp)

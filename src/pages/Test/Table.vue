@@ -68,7 +68,8 @@
             <!-- <span class="que_type">{{item.type}}</span> -->
             <span class="que_content">{{index + 1}}.&nbsp;{{item.question}}<span class="que_score"></span></span>
             <div class="fill_option">
-              <mu-text-field v-model="fillAnswer" label="填写答案" full-width multi-line :rows="3" :rows-max="6"></mu-text-field>
+                <input type="text" style="border: 1px solid #090" v-model="fillAnswer" label="填写答案"></input>
+              <!-- <mu-text-field v-model="fillAnswer" label="填写答案" full-width multi-line :rows="3" :rows-max="6"></mu-text-field> -->
             </div>
           </template>
         </div>
@@ -503,7 +504,7 @@
         }
         else if(this.tableData.questions[this.current_index].type=='填空'){
           // this.answer.answer_list[this.current_index] = this.fillAnswer
-          if(this.fillAnswer.length==0){
+          if(this.fillAnswer.match(/^[ ]*$/)){
               Toast({
                 message: '还没有填空',
                 duration: 1500
