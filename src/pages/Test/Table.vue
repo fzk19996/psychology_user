@@ -1,6 +1,6 @@
 <template>
   <section class="paper">
-    <HeaderTop :title="tableData.title" class="paper_header">
+    <HeaderTop  class="paper_header">
       <a href="javascript:" slot="left" class="go_back" @click="toBack">
         <i class="iconfont iconfanhui"></i>
       </a>
