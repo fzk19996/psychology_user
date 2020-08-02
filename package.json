@@ -19,6 +19,7 @@
     "element-ui": "^2.7.0",
     "fastclick": "^1.0.6",
     "jquery": "^3.4.0",
+    "js-audio-recorder": "^1.0.6",
     "ly-tab": "^2.1.2",
     "mint-ui": "^2.2.13",
     "mockjs": "^1.0.1-beta3",

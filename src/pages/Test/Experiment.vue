@@ -47,6 +47,9 @@
       </section>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
+          <mt-button type="primary" @click.native="begin_recorder" >开始录音</mt-button>
+          <mt-button type="primary" @click.native="stop_recorder" >停止录音</mt-button>
+          <mt-button type="primary" @click.native="download_recorder" >下载录音</mt-button>
           <template v-if="current_index===experimentData.questions.length-1">
             <mt-button type="primary" @click.native="clickSubmit" >提交测试</mt-button>
             <el-upload
@@ -83,6 +86,7 @@
   import {getNumberPrefix} from '../../utils/common.js'
   import {mapState, mapActions, mapGetters} from 'vuex'
   import qs from 'qs'
+  import Recorder from 'js-audio-recorder'
 
   export default {
     name: "",
@@ -155,7 +159,8 @@
         question_index:1,
         rightDialog:false,
         errorDialog:false,
-        key_effect:true
+        key_effect:true,
+        recorder_list:[]
       }
     },
     computed:{
@@ -178,6 +183,7 @@
       this.experiment_id = this.$store.state.experiment_id
       this.getExperimentInfo(this.experiment_id)
       this.test_id = this.$store.state.test_id
+      this.recorder = new Recorder()
       var that = this;
       document.onkeydown = function(e) {
             console.log(that.key_effect)
@@ -279,6 +285,23 @@
         'refreshFillAnswers',
         'refreshFirstCurrentTime',
       ]),
+
+      begin_recorder(){
+        if(this.recorder.duration==0){
+          this.recorder.start()
+        }else{
+          this.recorder.resume()
+        }
+      },
+
+      stop_recorder(){
+        this.recorder.pause()
+      },
+
+      download_recorder(){
+        this.recorder.stop()
+        this.recorder.downloadWAV()
+      },
 
       start_timer(){
         if(this.time_use>=this.experimentData.questions[this.current_index].time_limit){
