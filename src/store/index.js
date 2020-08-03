@@ -44,6 +44,7 @@ export default new Vuex.Store({
         answer_list:[],
         experiment_id:0
       },
+      record_list:[],
       video_url:'',
       test_id:0
     },

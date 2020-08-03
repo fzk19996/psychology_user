@@ -47,10 +47,8 @@
       </section>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
-          <mt-button type="primary" @click.native="begin_recorder" >开始录音</mt-button>
-          <mt-button type="primary" @click.native="stop_recorder" >停止录音</mt-button>
-          <mt-button type="primary" @click.native="download_recorder" >下载录音</mt-button>
           <template v-if="current_index===experimentData.questions.length-1">
+            <mt-button type="primary" @click.native="download_recorder" >下载录音</mt-button>
             <mt-button type="primary" @click.native="clickSubmit" >提交测试</mt-button>
             <el-upload
                 class="upload"
@@ -265,8 +263,8 @@
                     that.nextQuestion()
                 }
             }
-
         }
+        this.begin_recorder()
     },
     methods: {
       ...mapActions([
@@ -289,16 +287,20 @@
       begin_recorder(){
         if(this.recorder.duration==0){
           this.recorder.start()
+          this.recorder_list.push({'start':0})
         }else{
+          this.recorder_list.push({'start':this.recorder_list[this.recorder_list.length-1].end, 'question_id': this.experimentData.questions[this.current_index].question_id})
           this.recorder.resume()
         }
       },
 
       stop_recorder(){
+        this.recorder_list[this.recorder_list.length-1].end = this.recorder.duration
         this.recorder.pause()
       },
 
       download_recorder(){
+        this.recorder_list[this.recorder_list.length-1].end = this.recorder.duration
         this.recorder.stop()
         this.recorder.downloadWAV()
       },
@@ -328,10 +330,12 @@
           }
           this.current_index += 1
           this.start_question_time = new Date().getTime()
+          this.stop_recorder()
           if(this.experimentData.questions[this.current_index].time_limit!=0){
             this.time_use = 0
             this.timer = setInterval(this.start_timer, 1000)
           }
+          this.begin_recorder()
         }
         this.key_effect = true
       },
@@ -385,6 +389,7 @@
           // })
           var answer = this.$store.state.answer
           answer.video_url = this.video_url
+          answer.record_list = this.recorder_list
           let res = await addAnswer(this.$store.state.answer)
           console.log('提交试卷得到结果')
           console.log(res)
