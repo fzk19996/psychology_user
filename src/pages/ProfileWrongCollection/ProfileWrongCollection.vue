@@ -72,8 +72,11 @@
         answers:[]
       }
     },
+    activated(){
+      // console.log('被激活了')
+    },
     created(){
-      this.getAllTest();
+      this.getAllTest()
     },
     computed: {
       optionLeft () {
@@ -129,11 +132,21 @@
         }
       },
       toCollectionDetail(test_info){
+        if(this.$store.state.tableList.length!=0){
+            if(confirm('检查到还有题目没有做，是否需要继续')==true){
+              if(this.$store.state.current_index==-1)
+                this.$router.push({name:"experiment"})
+              else
+                this.$router.push({name:"table"})
+              return
+            }
+        }
         this.$store.commit('record_table_list', (test_info.table_id+'').split(';'))
         this.$store.commit('refresh_table_index', 0)
         this.$store.commit('record_experiment_id', test_info.experiment_id)
         this.$store.commit('record_test_id', test_info.test_id)
         this.$store.commit('refresh_current_index',0)
+        this.$store.commit('refresh_experiment_index', 0)
         this.$store.commit('record_answer', {
           table_answer:{
             answer_list:[],
@@ -144,6 +157,7 @@
             answer_list:[],
             experiment_id:test_info.experiment_id
           },
+          record_list:[],
           video_url:'',
           test_id:test_info.test_id
         })

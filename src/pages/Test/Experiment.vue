@@ -39,7 +39,7 @@
       <section class="que" v-for="(item, index) in experimentData.questions" :key="index"
                v-show="index == current_index">
         <div class="content">
-          <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{question_index}}</template>.&nbsp;{{item.question}}</span>
+          <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{current_index+1}}</template>.&nbsp;{{item.question}}</span>
           <template v-if="item.type==='注视点'||item.type=='指导语'||item.type.indexOf('按键反应'>=0)||item.type=='看图回答问题'||item.type=='根据要求说出词语'">
               <img v-if="item.pic_url!==''" :src="item.pic_url" height="600" width="1200"></img>
           </template>
@@ -168,7 +168,8 @@
         'multipleAnswers',
         'judgeAnswers',
         'fillAnswers',
-        'firstCurrentTime'
+        'firstCurrentTime',
+        'refresh_experiment_index'
       ]),
       ...mapGetters(['completeNumber'])
     },
@@ -180,8 +181,15 @@
       // });
       this.experiment_id = this.$store.state.experiment_id
       this.getExperimentInfo(this.experiment_id)
+      this.current_index = this.$store.state.experimentIndex
+      console.log(this.current_index)
       this.test_id = this.$store.state.test_id
-      this.recorder = new Recorder()
+      if(this.current_index==0)
+        this.recorder = new Recorder()
+      else
+        this.recorder = this.$store.state.recorder
+      var answer = this.$store.state.answer
+      this.recorder_list = answer.record_list
       var that = this;
       document.onkeydown = function(e) {
             console.log(that.key_effect)
@@ -324,17 +332,23 @@
       nextQuestion2(){
         if(this.current_index<this.experimentData.questions.length-1){
           this.answer.current_index += 1
-          sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
+          // sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
           if(this.experimentData.questions[this.current_index].type!='指导语'||this.experimentData.questions[this.current_index].type!='注视点'){
             this.question_index += 1
           }
           this.current_index += 1
           this.start_question_time = new Date().getTime()
           this.stop_recorder()
+          this.$store.commit('refresh_recorder', this.recorder)
           if(this.experimentData.questions[this.current_index].time_limit!=0){
             this.time_use = 0
             this.timer = setInterval(this.start_timer, 1000)
           }
+          // var answer = this.$store.state.answer
+          // answer.record_list = this.record_list
+          // answer.table_answer.answer_list = this.answer_list
+          // this.$store.commit('record_answer', answer)
+          this.$store.commit('refresh_experiment_index', this.current_index)
           this.begin_recorder()
         }
         this.key_effect = true
@@ -405,6 +419,8 @@
                 message:'提交成功，请查看成绩',
                 duration: 1500
               });
+              this.$store.commit('record_table_list', [])
+              this.$store.commit('refresh_current_index',0)
               this.$router.replace('/profile/');
             }, 2000)
           }
@@ -467,6 +483,7 @@
                       tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
                       tmp.correct = 1
                       answer.experiment_answer.answer_list.push(tmp)
+                      answer.record_list = this.recorder_list
                       _this.$store.commit('record_answer', answer)
                       _this.nextQuestion2()
                     }, 2000);
@@ -489,6 +506,7 @@
                       tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
                       tmp.correct = 0
                       answer.experiment_answer.answer_list.push(tmp)
+                      answer.record_list = this.recorder_list
                       _this.$store.commit('record_answer', answer)
                       _this.nextQuestion2()
                     }, 2000);
@@ -509,13 +527,14 @@
           if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
             tmp.correct = 0
           }else{
-            tmp.correct = 1
+            tmp.correct = 1 
           }
           tmp.time_use = new Date().getTime() - this.start_question_time
         }
         tmp.answer = this.fillAnswer
         tmp.question_id = this.experimentData.questions[this.current_index].question_id
         answer.experiment_answer.answer_list.push(tmp)
+        answer.record_list = this.recorder_list
         this.$store.commit('record_answer', answer)
         this.nextQuestion2()
         return true

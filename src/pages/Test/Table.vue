@@ -151,6 +151,12 @@
       // if(this.table_id === ''){
       //    this.$router.push({name:"experiment",params:{'experiment_id':this.$route.params.experiment_id}})
       // }
+      this.answer_list = this.$store.state.answer.table_answer.answer_list
+      this.current_index = this.$store.state.current_index
+      if(this.current_index==-1){
+        this.$router.push({name:"experiment"})
+      }
+      console.log(this.current_index)
       this.table_id = this.$store.state.tableList[this.$store.state.tableIndex]
       this.answer_list = []
       this.getTableInfo()
@@ -326,13 +332,10 @@
                           that.table_id = that.$store.state.tableList[that.$store.state.tableIndex]
                           that.getTableInfo()
                           that.tableIndex += 1
-                          
                         }else{
-                          var answer = that.$store.state.answer
-                          answer.table_answer.answer_list = that.answer_list
-                          that.$store.commit('record_answer', answer)
                           console.log('跳转到实验页面')
-                          that.$router.push({name:"experiment",params:{'experiment_id':that.experiment_id,'test_id':that.test_id}})
+                          that.$store.commit('refresh_current_index', -1)
+                          that.$router.push({name:"experiment"})
                         }
                     }
                 } 
@@ -394,7 +397,7 @@
         //   this.answer_list.push({})
         // }
         // this.answer.table_id = this.table_id
-        this.current_index = 0
+        // this.current_index = 0
         this.isloading = false
       }else{
         Toast({
@@ -528,6 +531,9 @@
         //   answer.table_answer.answer_list[this.$store.state.current_index] = tmp
         // }
         this.answer_list.push(tmp)
+        var answer = this.$store.state.answer
+        answer.table_answer.answer_list = this.answer_list
+        this.$store.commit('record_answer', answer)
         // this.$store.commit('record_answer', answer)
         return true
       },
