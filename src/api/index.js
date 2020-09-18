@@ -7,6 +7,23 @@ import ajax from './ajax'
 const BASE_URL = 'http://127.0.0.1:8081'
 
 /*
+答案接口
+ */
+export const addAnswer = (data) => ajax('/api/answer/addAnswer', data, 'POST')
+
+export const queryExamQuestion = (data) => ajax('/api/answer/queryExamQuestion', data, 'POST', 'application/x-www-form-urlencoded')
+
+export const beginExam = (data) => ajax('/api/answer/beginExam', data, 'POST', 'application/x-www-form-urlencoded')
+
+export const continueExam = (data) => ajax('/api/answer/continueExam', data, 'POST', 'application/x-www-form-urlencoded')
+
+export const endExam = (data) => ajax('/api/answer/endExam', data, 'POST', 'application/x-www-form-urlencoded')
+
+export const queryRedisAnswerVO = (data) => ajax('/api/answer/queryRedisAnswerVO', data, 'POST', 'application/x-www-form-urlencoded')
+
+export const submitAnswer = (data) => ajax('/api/answer/submitAnswer', data, 'POST', 'application/x-www-form-urlencoded')
+
+/*
 校验学生登录
 */
 export const userRegister = (data) => ajax('/api/user/register', data, 'POST')
@@ -22,8 +39,6 @@ export const getTestById = (data) =>  ajax('/api/test/getTestById', data, 'POST'
 export const getTableById = (data) => ajax('/api/test/queryTableById', data)
 
 export const getExperimentById = (data) => ajax('/api/test/queryExperimentById', data)
-
-export const addAnswer = (data) => ajax('/api/test/addAnswer', data, 'POST')
 
 export const getPushList = (data) => ajax('/api/psychology/article', data, 'POST', 'application/x-www-form-urlencoded')
 

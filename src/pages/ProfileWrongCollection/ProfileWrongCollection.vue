@@ -33,7 +33,7 @@
   import BackToTop from '../../components/BackToTop'
   import {Toast} from 'mint-ui'
   import {mapState} from 'vuex'
-  import {reqAllCollections, reqCollectionsById, getTestList} from '../../api'
+  import {reqAllCollections, reqCollectionsById, getTestList, beginExam, endExam} from '../../api'
   import qs from 'qs'
 
   export default {
@@ -113,7 +113,7 @@
       },
       async getCollectionsById(queType){
         let result = await reqCollectionsById(this.sno, queType);
-        if (result.statu == 0){
+        if (result.status== 0){
           this.collectionsList = result.data;
         }
         else {
@@ -131,39 +131,81 @@
           this.getCollectionsById(item.queType);
         }
       },
-      toCollectionDetail(test_info){
-        if(this.$store.state.tableList.length!=0){
-            if(confirm('检查到还有题目没有做，是否需要继续')==true){
-              if(this.$store.state.current_index==-1)
-                this.$router.push({name:"experiment"})
-              else
-                this.$router.push({name:"table"})
+      async toCollectionDetail(test_info){
+        // if(this.$store.state.tableList.length!=0){
+        //     if(confirm('检查到还有题目没有做，是否需要继续')==true){
+        //       if(this.$store.state.current_index==-1)
+        //         this.$router.push({name:"experiment"})
+        //       else
+        //         this.$router.push({name:"table"})
+        //       return
+        //     }
+        // }
+        // this.$store.commit('record_table_list', (test_info.tableId+'').split(';'))
+        // this.$store.commit('refresh_table_index', 0)
+        // this.$store.commit('record_experiment_id', test_info.experimentId)
+        // this.$store.commit('record_test_id', test_info.testId)
+        // this.$store.commit('refresh_current_index',0)
+        // this.$store.commit('refresh_experiment_index', 0)
+        // this.$store.commit('record_answer', {
+        //   table_answer:{
+        //     answer_list:[],
+        //     table_ids:test_info.testId
+        //     // table_id:0
+        //   },
+        //   experiment_answer:{
+        //     answer_list:[],
+        //     experiment_id:test_info.experimentId
+        //   },
+        //   record_list:[],
+        //   video_url:'',
+        //   test_id:test_info.testId
+        // })
+        let result = await beginExam(qs.stringify({test_id:test_info.testId}));
+        console.log(result.data)
+        if (result.status == 200){
+          if(result.data==-1){
+            Toast({
+              message:"加载试卷失败",
+              duration: 1500
+            });
+            return;
+          }
+          else if(result.data==1){
+            Toast({
+              message:"加载试卷成功，开始测试",
+              duration:1500
+            })
+            this.$router.push({name:"table", params:{mode:"new"}})
+            return
+          }
+          else if(result.data==2){
+            console.log('有考试正在进行')
+            if(confirm('检查到还有考试正在进行，是否需要继续')==true){
+              this.$router.push({name:"table",params:{mode:"continue"}})
               return
+            }else{
+              let result = await endExam();
+              if(result.status!=200){
+                Toast({
+                  message:"结束考试失败",
+                  duration:2000
+                })
+              }else{
+                this.toCollectionDetail(test_info);
+                return;
+              }
             }
+            return;
+          }
         }
-        this.$store.commit('record_table_list', (test_info.table_id+'').split(';'))
-        this.$store.commit('refresh_table_index', 0)
-        this.$store.commit('record_experiment_id', test_info.experiment_id)
-        this.$store.commit('record_test_id', test_info.test_id)
-        this.$store.commit('refresh_current_index',0)
-        this.$store.commit('refresh_experiment_index', 0)
-        this.$store.commit('record_answer', {
-          table_answer:{
-            answer_list:[],
-            table_ids:test_info.test_id
-            // table_id:0
-          },
-          experiment_answer:{
-            answer_list:[],
-            experiment_id:test_info.experiment_id
-          },
-          record_list:[],
-          video_url:'',
-          test_id:test_info.test_id
-        })
-        this.$router.push({name:"table"})
+        Toast({
+          message:"出现异常情况",
+          duration: 1500
+        });
       }
     },
+
     components:{
       HeaderTop,
       ProfileItem,

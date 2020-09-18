@@ -14,14 +14,14 @@
 
     <!--考试日期和考试时长-->
     <div class="paper_sub_title_first">
-      <span class="paper_date">考试日期：{{currentDate | date-format('YYYY-MM-DD')}}</span>
-      <span class="paper_duration">考试时长：{{paperInfo.paperDuration/60}}分钟</span>
+      <!-- <span class="paper_date">考试日期：{{currentDate | date-format('YYYY-MM-DD')}}</span>
+      <span class="paper_duration">考试时长：{{paperInfo.paperDuration/60}}分钟</span> -->
     </div>
 
     <!--时间提醒和当前题数-->
     <div class="paper_sub_title_second">
-      <span class="paper_clock"><i class="iconfont iconjishiqi"></i>{{restTime}}</span>
-      <span class="paper_statistics"><i class="iconfont icontongji"></i>{{current_index  + 1}}/{{experimentData.questions.length}}</span>
+      <!-- <!-- <span class="paper_clock"><i class="iconfont iconjishiqi"></i>{{restTime}}</span> -->
+      <span class="paper_statistics" v-if="questionIndex<total_cnt"><i class="iconfont icontongji"></i>题目个数：{{questionIndex+1}}/{{total_cnt}}</span>
     </div>
 
     <!--考卷进度条提醒-->
@@ -35,20 +35,19 @@
         </keep-alive>-->
 
     <!--试卷问题及选项区域-->
-    <div class="paper_container" v-show="showPaperContainer">
-      <section class="que" v-for="(item, index) in experimentData.questions" :key="index"
-               v-show="index == current_index">
+    <div class="paper_container">
+      <section class="que" v-if="questionIndex<total_cnt">
+        <span>{{questionVO.type}}</span>
         <div class="content">
-          <span class="que_content" ><template v-if="item.type!=='指导语'&&item.type!=='注视点'">{{current_index+1}}</template>.&nbsp;{{item.question}}</span>
-          <template v-if="item.type==='注视点'||item.type=='指导语'||item.type.indexOf('按键反应'>=0)||item.type=='看图回答问题'||item.type=='根据要求说出词语'">
-              <img v-if="item.pic_url!==''" :src="item.pic_url" height="600" width="1200"></img>
+          <span class="que_content" ><template v-if="questionVO.type!=='指导语'&&questionVO.type!=='注视点'">{{questionIndex+1}}</template>.&nbsp;{{questionVO.question}}</span>
+          <template v-if="questionVO.type==='注视点'||questionVO.type=='指导语'||questionVO.type.indexOf('按键反应'>=0)||questionVO.type=='看图回答问题'||questionVO.type=='根据要求说出词语'">
+              <img v-if="questionVO.pic_url!==''" :src="questionVO.pic_url" height="600" width="1200"></img>
           </template>
         </div>
       </section>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
-          <template v-if="current_index===experimentData.questions.length-1">
-            <mt-button type="primary" @click.native="download_recorder" >下载录音</mt-button>
+          <template v-if="questionIndex>=total_cnt">
             <mt-button type="primary" @click.native="clickSubmit" >提交测试</mt-button>
             <el-upload
                 class="upload"
@@ -80,7 +79,7 @@
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
   import {Toast, MessageBox, Indicator} from 'mint-ui'
-  import {getExperimentById, addAnswer} from '../../api'
+  import {submitAnswer, addAnswer, continueExam, queryExamQuestion, queryRedisAnswerVO} from '../../api'
   import {getNumberPrefix} from '../../utils/common.js'
   import {mapState, mapActions, mapGetters} from 'vuex'
   import qs from 'qs'
@@ -90,75 +89,34 @@
     name: "",
     data() {
       return {
-        //当前日期
-        currentDate: new Date(),
-        //试卷信息
-        paperInfo: {},
-        //试卷问题类型数量
-        queNumInfo: {},
-
-        table_answer:[],
-        
-        answer:{
-            answer_list:[],
-            current_index:0,
-            experiment_id:''
-        },
-
         answer_template:{
           question_id: '',
-          answer: '',
+          answer:'',
+          score:'',
+          que_type:'',
           time_use:'',
-          correct: ''
+          correct:'',
+          type:'',
+          index:'',
+          start:'',
+          end:''
         },
-
-        //初始化时间戳
-        currentTime: new Date().getTime(),
-        restTime: "",
-        timer: "",
-        //单选题数组
-        singleQueList: [],
-        //单选题答案
-        singleAnswer: '',
-
-        //多选题数组
-        multipleQueList: [],
-        //多选题答案
-        multipleAnswer: [],
-
-        //判断题数组
-        judgeQueList: [],
-        //判断题答案
-        judgeAnswer: '',
-        test_id:'',
-        //填空题数组
-        fillQueList: [],
-        //填空题答案
-        fillAnswer: '',
-        //是否显示paperContainer,默认进入页面为true
-        showPaperContainer: true,
-        //是否显示paperCard答题卡，默认进入页面为false，当点击答题卡区域为true
-        showPaperCard: false,
-        timeUsed:0, //考试花费时间
-        percentage:0, //进度条值
-        experiment:{},
-        timer:"",
-        time_use:0,
-        is_experiment:false,
-        tableAnswer:[],
-        experimentAnswer:[],
-        video_url: '',
-        videoFlag: false, //是否显示进度条
-        videoUploadPercent: "", //进度条的进度，
-        start_question_time:0,
-        current_index:0,
-        experiment_id:'',
-        experimentData:{},
-        question_index:1,
-        rightDialog:false,
+        questionVO:{},
+        questionIndex:0,
+        total_cnt:0,
         errorDialog:false,
+        rightDialog:false,
         key_effect:true,
-        recorder_list:[]
+        fillAnswer:'',
+        record_start:0,
+        record_end:0,
+        timer:'',
+        start_question_time:0,
+        time_use:0,
+        videoList:'',
+        recorder:'',
+        percentage:0
+
       }
     },
     computed:{
@@ -174,25 +132,32 @@
       ...mapGetters(['completeNumber'])
     },
 
-    created() {
+    async created() {
       // Indicator.open({
       //   text: '加载中...',
       //   spinnerType: 'fading-circle'
       // });
-      this.experiment_id = this.$store.state.experiment_id
-      this.getExperimentInfo(this.experiment_id)
-      this.current_index = this.$store.state.experimentIndex
-      console.log(this.current_index)
-      this.test_id = this.$store.state.test_id
-      if(this.current_index==0)
-        this.recorder = new Recorder()
-      else
-        this.recorder = this.$store.state.recorder
-      var answer = this.$store.state.answer
-      this.recorder_list = answer.record_list
+      let mode = this.$route.params.mode
+      if(mode=='continue'){
+        let res = await continueExam()
+        if(res.status==200){
+          this.questionVO = res.data
+          console.log(this.questionVO)
+          this.questionIndex = this.questionVO.question_index_t
+        }else{
+          console.log("出现异常")
+        }
+      }else{
+        this.queryExamQuestion()
+      }
+      let res = await queryRedisAnswerVO();
+      if(res.status==200){
+        this.total_cnt = res.data.tableQuestionVOList.length
+      }else{
+        console.log("出现异常")
+      }
       var that = this;
       document.onkeydown = function(e) {
-            console.log(that.key_effect)
             if(that.key_effect==false){
               console.log('按键无效')
               return
@@ -201,78 +166,68 @@
             let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
             //键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
             //左
+            var question_now = that.questionVO
             if(e1 && e1.keyCode==49+0){ //按键1
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '1'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+1){ //按键2
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板'||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '2'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+2){ //按键3
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '3'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+3){ //按键4
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '4'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+4){ //按键5
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0||question_now.type=='工作记忆模板2'){
                     that.fillAnswer = '5'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+5){ //按键6
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
                     that.fillAnswer = '6'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+6){ //按键7
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
                     that.fillAnswer = '7'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+7){ //按键8
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
                     that.fillAnswer = '8'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==49+8){ //按键9
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')>=0){
                     that.fillAnswer = '9'
                     that.nextQuestion()
                 }
             }
             else if(e1 && e1.keyCode==13){
-                var question_now = that.experimentData.questions[that.current_index]
                 if(question_now.type.indexOf('按键反应')<0&&question_now.type!='记忆测验'&&question_now.type!='根据要求说出词语'&&question_now.type!='注视点'&&question_now.type!='工作记忆模板'&&question_now.type!='工作记忆模板2'){
                     console.log('下一题')
                     that.nextQuestion()
                 }
             }
         }
-        this.begin_recorder()
     },
     methods: {
       ...mapActions([
@@ -292,29 +247,8 @@
         'refreshFirstCurrentTime',
       ]),
 
-      begin_recorder(){
-        if(this.recorder.duration==0){
-          this.recorder.start()
-          this.recorder_list.push({'start':0})
-        }else{
-          this.recorder_list.push({'start':this.recorder_list[this.recorder_list.length-1].end, 'question_id': this.experimentData.questions[this.current_index].question_id})
-          this.recorder.resume()
-        }
-      },
-
-      stop_recorder(){
-        this.recorder_list[this.recorder_list.length-1].end = this.recorder.duration
-        this.recorder.pause()
-      },
-
-      download_recorder(){
-        this.recorder_list[this.recorder_list.length-1].end = this.recorder.duration
-        this.recorder.stop()
-        this.recorder.downloadWAV()
-      },
-
       start_timer(){
-        if(this.time_use>=this.experimentData.questions[this.current_index].time_limit){
+        if(this.time_use>=this.questionVO.time_limit){
           this.time_use = 0
           this.nextQuestion()
         }else{
@@ -323,61 +257,18 @@
       },
 
       nextQuestion(){
-        if(this.current_index<this.experimentData.questions.length-1){
-            if(!this.setAnswer())
-                return
+        if(this.questionIndex<this.total_cnt){
+            this.setAnswer()
         }
       },
 
       nextQuestion2(){
-        if(this.current_index<this.experimentData.questions.length-1){
-          this.answer.current_index += 1
-          // sessionStorage.setItem('experiment_answer',JSON.stringify(this.answer))
-          if(this.experimentData.questions[this.current_index].type!='指导语'||this.experimentData.questions[this.current_index].type!='注视点'){
-            this.question_index += 1
-          }
-          this.current_index += 1
-          this.start_question_time = new Date().getTime()
-          this.stop_recorder()
-          this.$store.commit('refresh_recorder', this.recorder)
-          if(this.experimentData.questions[this.current_index].time_limit!=0){
-            this.time_use = 0
-            this.timer = setInterval(this.start_timer, 1000)
-          }
-          // var answer = this.$store.state.answer
-          // answer.record_list = this.record_list
-          // answer.table_answer.answer_list = this.answer_list
-          // this.$store.commit('record_answer', answer)
-          this.$store.commit('refresh_experiment_index', this.current_index)
-          this.begin_recorder()
+        this.questionIndex += 1
+        if(this.questionIndex<this.total_cnt){
+          this.queryExamQuestion()
         }
         this.key_effect = true
       },
-
-
-    async getExperimentInfo(experiment_id){
-      // console.log(this.testId)
-      let result = await getExperimentById({experiment_id:experiment_id})
-      if(result.status==200){
-        console.log('量表数据')
-        this.experimentData = result.data
-        for(var i=0;i<this.experimentData.questions.length;i++){
-            this.answer.answer_list.push(JSON.parse(JSON.stringify(this.answer_template)))
-        }
-        this.start_question_time = new Date().getTime()
-            // }
-        if(this.experimentData.questions[this.current_index].time_limit!=0){
-            this.time_use = 0
-            this.timer = setInterval(this.start_timer, 1000)
-        }
-      }else{
-        Toast({
-            message: result.msg,
-            duration: 2000
-        });
-        this.$router.replace('/profile')
-      }
-    },
 
 
       //用户手动点击提交试卷按钮，弹出确认框
@@ -391,23 +282,8 @@
           });
           return
         }
-        let table_answer = JSON.parse(sessionStorage.getItem('table_answer'))
-        let experiment_answer = JSON.parse(sessionStorage.getItem('experiment_answer'))
-        experiment_answer.experiment_id = this.experiment_id
-        // MessageBox.confirm('确定要提交试卷吗?').then(action => {
-          // let res = await addAnswer({
-          //   'table_answer':table_answer,
-          //   'experiment_answer':experiment_answer,
-          //   'test_id': this.test_id,
-          //   'video_url':this.video_url
-          // })
-          var answer = this.$store.state.answer
-          answer.video_url = this.video_url
-          answer.record_list = this.recorder_list
-          let res = await addAnswer(this.$store.state.answer)
-          console.log('提交试卷得到结果')
-          console.log(res)
-          if (res.status==200){
+        let res = await submitAnswer()
+        if (res.status==200){
             //等待成绩计算完毕并插入数据库表
             Indicator.open({
               text: '已经成功提交答案请稍等...',
@@ -419,9 +295,6 @@
                 message:'提交成功，请查看成绩',
                 duration: 1500
               });
-              this.$store.commit('record_table_list', [])
-              this.$store.commit('refresh_current_index',0)
-              this.$router.replace('/profile/');
             }, 2000)
           }
           else {
@@ -432,18 +305,6 @@
             // this.$router.replace('/profile')
           }
         },
-      //最终提交答案，包含用户手动点击提交按钮和到时自动提交
-      async handleSubmit() {
-        let tableAnswer = JSON.parse(sessionStorage.getItem('table_answer'))
-        // let result = await addAnswer({
-        //   'table_answer_list':tableAnswer,
-        //   'experiment_answer_list':this.experimentAnswer,
-        //   'test_id': this.test_id,
-        //   'video_url':this.video_url
-        // })
-        return result
-
-      },
  
       //点击返回按钮
       toBack() {
@@ -463,82 +324,97 @@
         return new Promise((resolve)=>setTimeout(resolve,ms));
       },
 
+      async submitAnswer(answer){
+        let res = await addAnswer(JSON.stringify(answer))
+        if(res.status==200)
+          return true
+        else
+          return false
+      },
+
+      async queryExamQuestion(){
+        let res =  await queryExamQuestion(qs.stringify({type:'experiment', index:this.questionIndex}))
+        if(res.status==200){
+          this.questionVO = res.data
+          this.record_start = (new Date()).getTime();
+          this.start_question_time =  (new Date()).getTime();
+          if(this.questionVO.time_limit!=0){
+            this.time_use=0
+            this.timer = setInterval(this.start_timer, 1000)
+          }
+        }else{
+          alert('查询题目失败')
+        }
+      },
+
       async setAnswer(){
         this.key_effect = false
-        var answer = this.$store.state.answer
-        var tmp = JSON.parse(JSON.stringify(this.answer_template))
-        if(this.experimentData.questions[this.current_index].time_limit!=0){
+        var answer = JSON.parse(JSON.stringify(this.answer_template))
+        answer.time_use = new Date().getTime() - this.start_question_time
+        answer.end =  new Date().getTime()
+        if(this.questionVO.time_limit!=0){
             clearInterval(this.timer)
-            tmp.time_use = new Date().getTime() - this.start_question_time
             console.log(this.fillAnswer)
-            if(this.experimentData.questions[this.current_index].type=='奖励按键反应' 
-                && this.experimentData.questions[this.current_index].right_answer === this.fillAnswer){
+            if(this.questionVO.type=='奖励按键反应' 
+                && this.questionVO.right_answer === this.fillAnswer){
                     Toast({
                       message: "回答正确",
                       duration: 2000
                     });
                     let _this = this
                     setTimeout(function()  {
-                      tmp.answer = _this.fillAnswer
-                      tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
-                      tmp.correct = 1
-                      answer.experiment_answer.answer_list.push(tmp)
-                      answer.record_list = this.recorder_list
-                      _this.$store.commit('record_answer', answer)
-                      _this.nextQuestion2()
+                      answer.answer = _this.fillAnswer
+                      answer.question_id = this.questionVO.question_id
+                      answer.correct = 1
+                      if(_this.submitAnswer(answer))
+                        _this.nextQuestion2()
+                      else
+                        console.log("提交答案失败")
                     }, 2000);
                     return
-                    // this.rightDialog = true
-                    // await this.sleep(2000);
-                    // this.rightDialog = false
-                    // this.errorVisble = false
-                  // alert("回答正确")
             }
-            else if(this.experimentData.questions[this.current_index].type=='惩罚按键反应' 
-                && this.experimentData.questions[this.current_index].right_answer !== this.fillAnswer){
+            else if(this.questionVO.type=='惩罚按键反应' 
+                && this.questionVO.right_answer !== this.fillAnswer){
                   Toast({
                       message: "回答错误",
                       duration: 2000
                   });
                   let _this = this
                     setTimeout(function()  {
-                      tmp.answer = _this.fillAnswer
-                      tmp.question_id = _this.experimentData.questions[_this.current_index].question_id
-                      tmp.correct = 0
-                      answer.experiment_answer.answer_list.push(tmp)
-                      answer.record_list = this.recorder_list
-                      _this.$store.commit('record_answer', answer)
-                      _this.nextQuestion2()
+                      answer.answer = _this.fillAnswer
+                      answer.question_id = _this.questionVO.question_id
+                      answer.correct = 0
+                       if(_this.submitAnswer(answer))
+                        _this.nextQuestion2()
+                      else
+                        console.log("提交答案失败")
                     }, 2000);
                     return 
-                  // var temple=await this.sleep(2000)
-                  // this.sleep(5000)
-                  // alert("回答错误")
             }
-            if(this.experimentData.questions[this.current_index].type.indexOf('按键反应')>=0){
-                if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
-                    tmp.correct = 0
+            if(this.questionVO.type.indexOf('按键反应')>=0){
+                if(this.questionVO.right_answer!==this.fillAnswer){
+                    answer.correct = 0
                 }else{
-                    tmp.correct = 1
+                    answer.correct = 1
                 }
             }
         }
-        if(this.experimentData.questions[this.current_index].type.indexOf('工作记忆模板')>=0){
-          if(this.experimentData.questions[this.current_index].right_answer!==this.fillAnswer){
-            tmp.correct = 0
+        if(this.questionVO.type.indexOf('工作记忆模板')>=0){
+          if(this.questionVO.right_answer!==this.fillAnswer){
+            answer.correct = 0
           }else{
-            tmp.correct = 1 
+            answer.correct = 1 
           }
-          tmp.time_use = new Date().getTime() - this.start_question_time
+          answer.time_use = new Date().getTime() - this.start_question_time
         }
-        tmp.answer = this.fillAnswer
-        tmp.question_id = this.experimentData.questions[this.current_index].question_id
-        answer.experiment_answer.answer_list.push(tmp)
-        answer.record_list = this.recorder_list
-        this.$store.commit('record_answer', answer)
-        this.nextQuestion2()
-        return true
+        answer.answer = this.fillAnswer
+        answer.question_id = this.questionVO.question_id
+         if(this.submitAnswer(answer))
+              this.nextQuestion2()
+         else
+              console.log("提交答案失败")
       },
+
       sleep(numberMillis) { 
         var now = new Date(); 
         var exitTime = now.getTime() + numberMillis; 
@@ -584,25 +460,7 @@
     },
     watch:{
       currentIndex() {
-        this.percentage = parseInt((this.currentIndex+1)/this.queNumInfo.totalNum*100);
-        sessionStorage.removeItem("currentIndex");
-        sessionStorage.setItem("currentIndex",this.currentIndex)
-      },
-      singleAnswers() {
-        sessionStorage.removeItem("singleAnswers");
-        sessionStorage.setItem("singleAnswers",JSON.stringify(this.singleAnswers))
-      },
-      multipleAnswers:function () {
-        sessionStorage.removeItem("multipleAnswers");
-        sessionStorage.setItem("multipleAnswers",JSON.stringify(this.multipleAnswers))
-      },
-      judgeAnswers() {
-        sessionStorage.removeItem("judgeAnswers");
-        sessionStorage.setItem("judgeAnswers",JSON.stringify(this.judgeAnswers))
-      },
-      fillAnswers() {
-        sessionStorage.removeItem("fillAnswers");
-        sessionStorage.setItem("fillAnswers",JSON.stringify(this.fillAnswers))
+        this.percentage = parseInt((this.questionIndex+1)/this.total_cnt*100);
       }
     }
   }
