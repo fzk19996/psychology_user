@@ -1,7 +1,7 @@
 <template>
   <section class="login-container">
     <!--利用$router.back()返回上一级路由 -->
-    <HeaderTop title="心理学测试调试平台">
+    <HeaderTop title="心理测试与心理调适平台">
       <a href="javascript:" slot="left" class="go_back" @click="$router.goBack()">
         <i class="iconfont iconxiazai6"></i>返回
       </a>

@@ -1,50 +1,24 @@
 <template>
   <section class="wrong_collection">
     <!--利用$router.back()返回上一级路由 -->
-    <HeaderTop title="收藏题目">
+    <HeaderTop title="心理调适列表">
       <a href="javascript:" slot="left" class="go_back" @click="$router.goBack()">
         <i class="iconfont iconxiazai6"></i>返回
       </a>
     </HeaderTop>
 
-    <!--教师公告无缝跑马灯-->
-    <div class="notices_run">
-      <i class="iconfont iconxiazai41"></i>
-
-      <vue-seamless-scroll :data="noticesList" :class-option="optionLeft" class="seamless-warp2">
-        <ul class="item">
-          <li v-for="item in noticesList">
-            {{item.title}}
-          </li>
-        </ul>
-      </vue-seamless-scroll>
-    </div>
-
-    <!--ly-tab实现触摸滑动具有回弹效果的分类导航-->
-    <ly-tab
-      v-model="selectedId"
-      :items="items"
-      :options="options"
-      v-if="userInfo.sno"
-      @change="clickTab">
-    </ly-tab>
-
-    <!--显示收藏题目列表-->
     <div class="collections_list">
       <mt-loadmore :top-method="loadTop" ref="loadmore">
         <div v-for="(item, index) in pushList" :key="index" @click="toPushDetail(item)">
-          <ProfileItem :title="item.name" icon="iconshoucangxuanzhong"></ProfileItem>
-        </div>
-        <div v-if="!isCollectionsList" class="bottom_tips" style="margin-top: 25px">
-          <span>我是有底线的</span>
+          <ProfileItem :title="item.title" icon="iconshoucangxuanzhong"></ProfileItem>
         </div>
       </mt-loadmore>
     </div>
 
     <!--无收藏题目列表显示的内容-->
-    <div class="no_collections_list" v-if="userInfo.sno && isCollectionsList">
+    <div class="no_collections_list" v-if="pushList.length==0">
       <img src="../../common/imgs/nopaperwrong.png" alt="">
-      <h3>暂无收藏记录</h3>
+      <h3>暂无调试列表</h3>
     </div>
 
     <!--点击返回顶部按钮-->
@@ -58,7 +32,7 @@
   import BackToTop from '../../components/BackToTop'
   import {Toast} from 'mint-ui'
   import {mapState} from 'vuex'
-  import {reqAllCollections, reqCollectionsById, getPushList} from '../../api'
+  import {queryUserPushs} from '../../api'
   import qs from 'qs'
 
   export default {
@@ -74,23 +48,6 @@
           'line-height': '45px', // 请保持与高度一致以垂直居中 Please keep consistent with height to center vertically
           background: '#e7eaf1'// 按钮的背景颜色 The background color of the button
         },
-        sno:this.$store.state.userInfo.sno,
-        noticesList:this.$store.state.examCalendar,
-        selectedId: 0,
-        items:[
-          {queType:0, label:'全部'},
-          {queType:1, label:'单选题'},
-          {queType:2, label:'多选题'},
-          {queType:3, label:'选择题'},
-          {queType:4, label:'填空题'}
-        ],
-        options: {
-          activeColor: '#4ab8a1',
-          // 可在这里指定labelKey为你数据里文字对应的字段
-          // labelKey: 'langName'
-        },
-        collectionsList:[],
-        isCollectionsList:false,
         pushList:[],
         offset:0,
         limit:20,
@@ -122,21 +79,9 @@
         }, 1000)
       },
       async getAllPush(){
-        let result = await getPushList(qs.stringify({offset:this.offset, limit:this.limit}));
+        let result = await queryUserPushs();
         if (result.status == 200){
           this.pushList = result.data;
-        }
-        else {
-          Toast({
-            message:result.msg,
-            duration: 1500
-          });
-        }
-      },
-      async getCollectionsById(queType){
-        let result = await reqCollectionsById(this.sno, queType);
-        if (result.statu == 0){
-          this.collectionsList = result.data;
         }
         else {
           Toast({

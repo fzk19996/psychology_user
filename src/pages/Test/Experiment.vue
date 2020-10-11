@@ -351,8 +351,10 @@
       async setAnswer(){
         this.key_effect = false
         var answer = JSON.parse(JSON.stringify(this.answer_template))
+        answer.start = this.record_start
         answer.time_use = new Date().getTime() - this.start_question_time
         answer.end =  new Date().getTime()
+        answer.type = 'experiment'
         if(this.questionVO.time_limit!=0){
             clearInterval(this.timer)
             console.log(this.fillAnswer)

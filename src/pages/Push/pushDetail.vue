@@ -5,14 +5,19 @@
             <i class="iconfont iconxiazai6"></i>返回
         </a>
     </HeaderTop>
-    <div class="paper-container">
-        <div class="ql-container ql-snow">
-            <div class="ql-editor" v-html="push.content">
-            </div>
-        </div>
-    </div>
+    <div id="article" class="content3 container">
+		<leftNav></leftNav>
+		<div class="contentArt fr">
+			<div class="article">
+				<div class="article_title container">
+					<h4>{{article.title}}</h4>
+				</div>
+				<span v-html="article.content"></span>
+			</div>
+		</div>
+	</div>
     <div>
-        <el-button @click="toTestDetail" >进入测试</el-button>
+        <el-button @click="toTest" >进入测试</el-button>
     </div>
 </section>
 
@@ -22,7 +27,7 @@
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
   import {Toast, MessageBox, Indicator} from 'mint-ui'
-  import { getTestById} from '../../api'
+  import { queryArticleById, getTestById, beginExam} from '../../api'
   import {getNumberPrefix} from '../../utils/common.js'
   import {mapState, mapActions, mapGetters} from 'vuex'
   import qs from 'qs'
@@ -32,7 +37,9 @@
     data() {
       return {
         //当前日期
-        push:{}
+        push: {},
+        article: {},
+        test: {}
       }
     },
     components:{
@@ -56,31 +63,67 @@
       //   spinnerType: 'fading-circle'
       // });
       this.push = this.$route.params.push
-      console.log('getPush')
+      this.getArticle()
       console.log(this.push)
     },
     methods: {
-        async getTestInfo(){
-        // console.log(this.testId)
-        let result = await getTestById(qs.stringify({test_id:this.push.testId}))
-        if(result.data){
-            this.testList = result.data.questions
-            var j;
-            for(j=0;j<this.testList.length;j++){
-            this.answer.push(JSON.parse(JSON.stringify(this.answer_template)))
-            }
-            console.log('answer')
-            console.log(this.answer)
-            }
-            console.log(this.testList)
-            console.log(result)
-        
+      
+        async getArticle(){
+          let res = await queryArticleById(this.push.articleId)
+          if(res.status==200){
+            this.article = res.data
+          }
         },
 
-        toTestDetail(){
-            this.$router.push({name:"test_start",params:{'testId':this.push.test_id}})
-        }
+        async toTest(){
+
+          let result = await beginExam(qs.stringify({test_id:this.push.testId}));
+          console.log(result.data)
+          if (result.status == 200){
+            if(result.data==-1){
+              Toast({
+                message:"加载试卷失败",
+                duration: 1500
+              });
+              return;
+            }
+            else if(result.data==1){
+              Toast({
+                message:"加载试卷成功，开始测试",
+                duration:1500
+              })
+              this.$router.push({name:"table", params:{mode:"new"}})
+              return
+            }
+            else if(result.data==2){
+              console.log('有考试正在进行')
+              if(confirm('检查到还有考试正在进行，是否需要继续')==true){
+                this.$router.push({name:"table",params:{mode:"continue"}})
+                return
+              }else{
+                let result = await endExam();
+                if(result.status!=200){
+                  Toast({
+                    message:"结束考试失败",
+                    duration:2000
+                  })
+                }else{
+                  this.toTest(test_info);
+                  return;
+                }
+              }
+              return;
+            }
+          }
+          Toast({
+            message:"出现异常情况",
+            duration: 1500
+          });
+      }
+
     }
+
+        
   }
 
    
@@ -89,6 +132,28 @@
 
 <style lang="stylus" type="text/stylus" rel="stylesheet/stylus" scoped>
   @import "../../common/stylus/mixins.styl"
+  .content3
+    width 1200px
+    min-height 650px
+    margin-top 38px
+  .contentArt
+    width 890px
+    margin-top 10px
+    margin-right 10px
+  .article_title
+    height 70px
+    line-height 70px
+    font-size 18px
+    text-align center
+    border-bottom 1px 
+    dotted #999
+    margin-bottom 15px
+    .span
+      text-indent 2em
+      margin-left 100px
+	    .p
+        line-height 25px
+        letter-spacing 2px
   .pic_option 
     margin-top 25px
     margin-bottom 25px
