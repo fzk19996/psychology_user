@@ -36,10 +36,10 @@
         <ProfileItem title="查看成绩" icon="iconchakan"></ProfileItem>
       </div>
       <div @click="toDetail('/profile/wrongcollection')">
-        <ProfileItem title="进行测试" icon="iconshoucang-"></ProfileItem>
+        <ProfileItem title="心理测试" icon="iconshoucang-"></ProfileItem>
       </div>
       <div @click="toDetail('/profile/pushList')">
-        <ProfileItem title="查看推送" icon="iconrili2"></ProfileItem>
+        <ProfileItem title="心理调试" icon="iconrili2"></ProfileItem>
       </div>
       <div @click="toDetail('/profile/pswchange')">
         <ProfileItem title="密码修改" icon="iconmima"></ProfileItem>

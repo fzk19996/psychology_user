@@ -44,7 +44,17 @@ export const getPushList = (data) => ajax('/api/psychology/article', data, 'POST
 
 export const getUserTestRes = (data) => ajax('/api/test/getUserTestRes', data, 'POST')
 
-export const getTablesByIdList = (data) =>  ajax('/api/test/getTablesByIdList', data, 'POST', 'application/x-www-form-urlencoded')
+export const queryTestListByUserId = (data) =>  ajax('/api/test/queryTestListByUserId', data, 'POST', 'application/x-www-form-urlencoded')
+
+
+
+/*
+调试接口
+*/
+export const queryUserPushs = () => ajax('/api/push/queryUserPushs', {}, 'POST')
+
+export const queryArticleById = (data) => ajax('/api/article/queryArticleById/'+data)
+
 /*
   获取轮播图片数据
  */

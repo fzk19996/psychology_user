@@ -295,6 +295,7 @@
                 message:'提交成功，请查看成绩',
                 duration: 1500
               });
+              this.$router.replace('/profile')
             }, 2000)
           }
           else {
@@ -364,8 +365,10 @@
                     let _this = this
                     setTimeout(function()  {
                       answer.answer = _this.fillAnswer
-                      answer.question_id = this.questionVO.question_id
+                      answer.question_id = this.questionVO.questionId
+                      answer.que_type = this.questionVO.type
                       answer.correct = 1
+                      answer.index = this.questionIndex
                       if(_this.submitAnswer(answer))
                         _this.nextQuestion2()
                       else
@@ -382,8 +385,10 @@
                   let _this = this
                     setTimeout(function()  {
                       answer.answer = _this.fillAnswer
-                      answer.question_id = _this.questionVO.question_id
+                      answer.question_id = this.questionVO.questionId
+                      answer.que_type = this.questionVO.type
                       answer.correct = 0
+                      answer.index = this.questionIndex
                        if(_this.submitAnswer(answer))
                         _this.nextQuestion2()
                       else
@@ -408,7 +413,9 @@
           answer.time_use = new Date().getTime() - this.start_question_time
         }
         answer.answer = this.fillAnswer
-        answer.question_id = this.questionVO.question_id
+        answer.question_id = this.questionVO.questionId
+        answer.que_type = this.questionVO.type
+        answer.index = this.questionIndex
          if(this.submitAnswer(answer))
               this.nextQuestion2()
          else

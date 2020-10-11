@@ -102,7 +102,7 @@
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
   import {Toast, MessageBox, Indicator} from 'mint-ui'
-  import {reqPapersInfoByPaperId, reqInsertStudentPaperScore, reqSubmitPaper, getTestById, submitTest} from '../../api'
+  import {reqPapersInfoByPaperId, reqInsertStudentPaperScore, reqSubmitPaper, getTestById} from '../../api'
   import {getNumberPrefix} from '../../utils/common.js'
   import {mapState, mapActions, mapGetters} from 'vuex'
   import qs from 'qs'

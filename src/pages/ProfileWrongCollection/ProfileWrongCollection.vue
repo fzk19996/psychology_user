@@ -33,7 +33,7 @@
   import BackToTop from '../../components/BackToTop'
   import {Toast} from 'mint-ui'
   import {mapState} from 'vuex'
-  import {reqAllCollections, reqCollectionsById, getTestList, beginExam, endExam} from '../../api'
+  import {queryTestListByUserId, reqAllCollections, reqCollectionsById, getTestList, beginExam, endExam} from '../../api'
   import qs from 'qs'
 
   export default {
@@ -100,7 +100,8 @@
         }, 1000)
       },
       async getAllTest(){
-        let result = await getTestList(qs.stringify({index:this.index, limit:this.limit}));
+        // let result = await getTestList(qs.stringify({index:this.index, limit:this.limit}));
+        let result = await queryTestListByUserId(qs.stringify({}))
         if (result.status == 200){
           this.testList = result.data;
         }
@@ -132,35 +133,6 @@
         }
       },
       async toCollectionDetail(test_info){
-        // if(this.$store.state.tableList.length!=0){
-        //     if(confirm('检查到还有题目没有做，是否需要继续')==true){
-        //       if(this.$store.state.current_index==-1)
-        //         this.$router.push({name:"experiment"})
-        //       else
-        //         this.$router.push({name:"table"})
-        //       return
-        //     }
-        // }
-        // this.$store.commit('record_table_list', (test_info.tableId+'').split(';'))
-        // this.$store.commit('refresh_table_index', 0)
-        // this.$store.commit('record_experiment_id', test_info.experimentId)
-        // this.$store.commit('record_test_id', test_info.testId)
-        // this.$store.commit('refresh_current_index',0)
-        // this.$store.commit('refresh_experiment_index', 0)
-        // this.$store.commit('record_answer', {
-        //   table_answer:{
-        //     answer_list:[],
-        //     table_ids:test_info.testId
-        //     // table_id:0
-        //   },
-        //   experiment_answer:{
-        //     answer_list:[],
-        //     experiment_id:test_info.experimentId
-        //   },
-        //   record_list:[],
-        //   video_url:'',
-        //   test_id:test_info.testId
-        // })
         let result = await beginExam(qs.stringify({test_id:test_info.testId}));
         console.log(result.data)
         if (result.status == 200){

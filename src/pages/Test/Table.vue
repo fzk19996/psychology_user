@@ -100,6 +100,7 @@
           start:'',
           end:''
         },
+        answer_sub:{},
 
         questionVO:{},
         singleQueList: [],
@@ -351,8 +352,10 @@
       },
 
     async nextQuestion(){
-      if(!this.setAnswer())
+      if(this.setAnswer()==false){
         return
+      }
+      console.log('成功')
       if(this.questionIndex+1>=this.total_cnt){
         //进入实验页面
         this.$router.push({name:"experiment", params:{mode:"normal"}})
@@ -360,25 +363,17 @@
       }
       let res = await queryExamQuestion(qs.stringify({index:this.questionIndex+1, type:'table'}))
       if(res.status==200){
-        console.log('ok')
+        // console.log('ok')
         this.questionVO = res.data
         this.questionIndex += 1
+      }else{
+         Toast({
+            message: '查询答案失败',
+            duration: 1500
+          });
       }
     },
 
-
-      //最终提交答案，包含用户手动点击提交按钮和到时自动提交
-      async handleSubmit() {
-        let result = await addAnswer({
-          'table_answer_list':this.tableAnswer,
-          'experiment_answer_list':this.experimentAnswer,
-          'test_id': this.test_id,
-          'video_url':this.video_url
-        })
-        return result
-
-      },
- 
       //点击返回按钮
       toBack() {
         MessageBox.confirm('系统将自动提交试卷，请确认是否离开考试?').then(action => {
@@ -392,8 +387,11 @@
           //点击取消按钮操作
         })
       },
-      async setAnswer(){
+      
+    async setAnswer(){
         var answer_final = ''
+        var score = 0
+        console.log("提交答案！")
         if(this.questionVO.type=='单选'){
             if(this.singleAnswer===''){
                 Toast({
@@ -403,6 +401,7 @@
                 return false
             }else{
                 answer_final = this.singleAnswer
+                score = this.questionVO.options[answer_final].score
                 // this.answer.answer_list[this.current_index] = this.singleAnswer
                 this.singleAnswer = ''
             }
@@ -416,6 +415,9 @@
                 return false
            }else{
                 answer_final = this.multipleAnswer.join(';')
+                for(var i=0;i<this.multipleAnswers.length;i++){
+                  score += this.questionVO.options[this.multipleAnswers[i]].score
+                }
                 // this.answer.answer_list[this.current_index] = this.multipleAnswer.join(';')
                 this.multipleAnswer = []
             }
@@ -433,17 +435,24 @@
           this.fillAnswer = ''
         }
         // var answer = this.$store.state.answer
-        var tmp = JSON.parse(JSON.stringify(this.answer_template))
-        tmp.question_id = this.questionVO.question_id
+        var tmp = {}
+        tmp.question_id = this.questionVO.questionId
         tmp.answer = answer_final
-        tmp.que_type = this.questionVO.que_type
+        tmp.que_type = this.questionVO.type
         tmp.index = this.questionIndex
         tmp.type = "table"
+        tmp.score = score
+        this.answer_sub = tmp
         let res = await addAnswer(JSON.stringify(tmp))
         if(res.status==200)
           return true
-        else
+        else{
+          Toast({
+            message: '提交答案失败',
+            duration: 1500
+          });
           return false
+        }
       },
 
       beforeUploadVideo (file) {
