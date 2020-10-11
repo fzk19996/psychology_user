@@ -8,7 +8,7 @@
 
       <div class="header_message" slot="right">
         <viewer>
-          <img src="../../common/imgs/school.jpg">
+          <!-- <img src="../../common/imgs/school.jpg"> -->
         </viewer>
       </div>
     </HeaderTop>
@@ -16,7 +16,7 @@
     <!--显示登录注册页面Vue标志图标-->
     <div class="login-logo">
       <viewer>
-        <img src="../../common/imgs/college.jpg" class="logo_img">
+        <!-- <img src="../../common/imgs/college.jpg" class="logo_img"> -->
       </viewer>
     </div>
 
