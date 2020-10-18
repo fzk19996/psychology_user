@@ -108,6 +108,7 @@
         multipleAnswer: [],
         fillAnswer:'',
         total_cnt:0,
+        question_submit:{},
 
         questionIndex:0,
 
@@ -129,7 +130,7 @@
 
     async created() {
       let mode = this.$route.params.mode
-      if(mode=='continue'){
+      if(mode==undefined||mode=='continue'){
         let res = await continueExam()
         if(res.status==200){
           if(res.data.type!='单选'&&res.data.type!='多选'&&res.data.type!='填空'){
@@ -137,8 +138,8 @@
              return
           }
           this.questionVO = res.data
-          console.log(this.questionVO)
-          this.questionIndex = this.questionVO.question_index_t
+          // console.log(this.questionVO)
+          this.questionIndex = this.questionVO.index
         }else{
           console.log("出现异常")
         }
@@ -352,7 +353,16 @@
       },
 
     async nextQuestion(){
-      if(this.setAnswer()==false){
+      // console.log(this.setAnswer())
+      if(!this.setAnswer()){
+        return
+      }
+      let res = await addAnswer(JSON.stringify(this.answer_sub))
+      if(res.status!=200){
+        Toast({
+            message: '提交答案失败',
+            duration: 1500
+        })
         return
       }
       console.log('成功')
@@ -361,7 +371,7 @@
         this.$router.push({name:"experiment", params:{mode:"normal"}})
         return
       }
-      let res = await queryExamQuestion(qs.stringify({index:this.questionIndex+1, type:'table'}))
+      res = await queryExamQuestion(qs.stringify({index:this.questionIndex+1, type:'table'}))
       if(res.status==200){
         // console.log('ok')
         this.questionVO = res.data
@@ -388,7 +398,7 @@
         })
       },
       
-    async setAnswer(){
+    setAnswer(){
         var answer_final = ''
         var score = 0
         console.log("提交答案！")
@@ -443,16 +453,17 @@
         tmp.type = "table"
         tmp.score = score
         this.answer_sub = tmp
-        let res = await addAnswer(JSON.stringify(tmp))
-        if(res.status==200)
-          return true
-        else{
-          Toast({
-            message: '提交答案失败',
-            duration: 1500
-          });
-          return false
-        }
+        return true
+        // let res = await addAnswer(JSON.stringify(tmp))
+        // if(res.status==200)
+        //   return true
+        // else{
+        //   Toast({
+        //     message: '提交答案失败',
+        //     duration: 1500
+        //   });
+        //   return false
+        // }
       },
 
       beforeUploadVideo (file) {

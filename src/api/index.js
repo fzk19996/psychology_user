@@ -22,7 +22,7 @@ export const endExam = (data) => ajax('/api/answer/endExam', data, 'POST', 'appl
 export const queryRedisAnswerVO = (data) => ajax('/api/answer/queryRedisAnswerVO', data, 'POST', 'application/x-www-form-urlencoded')
 
 export const submitAnswer = (data) => ajax('/api/answer/submitAnswer', data, 'POST', 'application/x-www-form-urlencoded')
-adf
+
 
 /*
 校验学生登录

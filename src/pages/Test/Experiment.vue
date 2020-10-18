@@ -41,7 +41,7 @@
         <div class="content">
           <span class="que_content" ><template v-if="questionVO.type!=='指导语'&&questionVO.type!=='注视点'">{{questionIndex+1}}</template>.&nbsp;{{questionVO.question}}</span>
           <template v-if="questionVO.type==='注视点'||questionVO.type=='指导语'||questionVO.type.indexOf('按键反应'>=0)||questionVO.type=='看图回答问题'||questionVO.type=='根据要求说出词语'">
-              <img v-if="questionVO.pic_url!==''" :src="questionVO.pic_url" height="600" width="1200"></img>
+              <img v-if="questionVO.picUrl!==''" :src="questionVO.picUrl" height="600" width="1200"></img>
           </template>
         </div>
       </section>
@@ -138,7 +138,7 @@
       //   spinnerType: 'fading-circle'
       // });
       let mode = this.$route.params.mode
-      if(mode=='continue'){
+      if(mode==undefined||mode=='continue'){
         let res = await continueExam()
         if(res.status==200){
           this.questionVO = res.data
