@@ -143,7 +143,13 @@
         if(res.status==200){
           this.questionVO = res.data
           console.log(this.questionVO)
-          this.questionIndex = this.questionVO.question_index_t
+          this.questionIndex = this.questionVO.index
+          this.record_start = (new Date()).getTime();
+          this.start_question_time =  (new Date()).getTime();
+          if(this.questionVO.timeLimit!=0){
+            this.time_use=0
+            this.timer = setInterval(this.start_timer, 1000)
+          }
         }else{
           console.log("出现异常")
         }
@@ -248,7 +254,7 @@
       ]),
 
       start_timer(){
-        if(this.time_use>=this.questionVO.time_limit){
+        if(this.time_use>=this.questionVO.timeLimit){
           this.time_use = 0
           this.nextQuestion()
         }else{
@@ -339,7 +345,7 @@
           this.questionVO = res.data
           this.record_start = (new Date()).getTime();
           this.start_question_time =  (new Date()).getTime();
-          if(this.questionVO.time_limit!=0){
+          if(this.questionVO.timeLimit!=0){
             this.time_use=0
             this.timer = setInterval(this.start_timer, 1000)
           }
