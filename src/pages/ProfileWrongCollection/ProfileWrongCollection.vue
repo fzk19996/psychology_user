@@ -111,6 +111,7 @@
             duration: 1500
           });
         }
+        console.log(this.testList)
       },
       async getCollectionsById(queType){
         let result = await reqCollectionsById(this.sno, queType);

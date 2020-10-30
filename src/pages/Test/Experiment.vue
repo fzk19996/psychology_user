@@ -158,7 +158,7 @@
       }
       let res = await queryRedisAnswerVO();
       if(res.status==200){
-        this.total_cnt = res.data.tableQuestionVOList.length
+        this.total_cnt = res.data.experimentQuestionVOList.length
       }else{
         console.log("出现异常")
       }
