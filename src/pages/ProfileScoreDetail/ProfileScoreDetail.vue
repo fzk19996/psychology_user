@@ -9,48 +9,50 @@
 
     <!--试卷标题-->
     <div class="paper_title">
-      <span>{{paperInfo.paperName}}</span>
+      <span></span>
     </div>
 
     <!--教师公告无缝跑马灯-->
     <div class="notices_run">
       <i class="iconfont iconxiazai41"></i>
 
-      <vue-seamless-scroll :data="examCalendar" :class-option="optionLeft" class="seamless-warp2">
+      <!-- <vue-seamless-scroll :data="examCalendar" :class-option="optionLeft" class="seamless-warp2">
         <ul class="item">
           <li>
             最新公告消息:{{examCalendar[0].noticeContent}}
           </li>
         </ul>
-      </vue-seamless-scroll>
+      </vue-seamless-scroll> -->
     </div>
 
     <!--成绩报告图表-->
-    <div class="score_chart">
-      <RingSchart :chartData="chartDataRingScore"/>
+    <div class="score_chart" style="margin-left:20%">
+      <!-- <RingSchart :chartData="chartDataRingScore"/>
       <BarSchart :chartData="chartDataBarCorrect"/>
-      <LineSchart :chartData="chartDataLineRanking"/>
-      <div class="score_text">
-        <p>
-          <span>你的分数：<span>{{myScore}}</span>分</span>
-          <span>当前排名：第<span>{{ranking}}</span>名</span>
-        </p>
-        <p>
-          <span>最高分：<span>{{maxScore}}</span>分</span>
-          <span>最低分：<span>{{minScore}}</span>分</span>
-        </p>
-        <p>
-          <span>平均分：<span>{{averageScore}}</span>分</span>
-          <span>参加总人数：<span>{{chartDataLineRanking.length}}</span>人</span>
-        </p>
-        <div>
-          <el-progress type="circle" :percentage="percentage" status="text"><span>{{myScore}}</span>分</el-progress>
-        </div>
-        <div class="percentage_title">你的分数与试卷总分比例</div>
-      </div>
-      <PieSchart :chartData="chartDataPieTime"/>
-      <div class="bottom_tips" style="margin-top: 35px">
-        <span>我是有底线的</span>
+      <LineSchart :chartData="chartDataLineRanking"/> -->
+      <div style="margin-bottom:20px"> 分数</div>
+      <el-row v-for="(tmp,index) in answer.varNameList">
+          <el-col>
+            变量名：{{answer.varNameList[index]}}
+          </el-col>
+          <el-col>
+            分数值：{{answer.scoreList[index]}}
+          </el-col>
+      </el-row>
+    </div>
+    <div style="margin-top:50px">
+      <div style="text-align:center"> 管理员评语</div>
+      <div style="margin-left:20%;margin-right:20%;margin-top:20px;width:60%">
+        <mavon-editor
+              class="md"
+              :value="answer.adminComment"
+              :subfield = "false"
+              :defaultOpen = "'preview'"
+              :toolbarsFlag = "false"
+              :editable="false"
+              :scrollStyle="true"
+              :ishljs = "true"
+            ></mavon-editor>
       </div>
     </div>
 
@@ -66,9 +68,12 @@
   import LineSchart from '../../components/Schart/LineSchart.vue'
   import PieSchart from '../../components/Schart/PieSchart.vue'
   import BackToTop from '../../components/BackToTop'
-  import {reqScoreReport} from '../../api'
+  import {queryAnswerResult} from '../../api'
   import {Toast, Indicator} from 'mint-ui'
   import { mapState } from 'vuex'
+  import {mavonEditor} from 'mavon-editor'
+  import 'mavon-editor/dist/css/index.css'
+  import qs from 'qs'
   export default {
     name: "",
     data() {
@@ -83,28 +88,8 @@
           background: '#e7eaf1'// 按钮的背景颜色 The background color of the button
         },
         sno:this.$store.state.userInfo.sno,
-        paperId:this.$route.params.paperId,
-        chartDataRingScore: [
-          {name: '单选题', value: 20},
-          {name: '多选题', value: 10},
-          {name: '判断题', value: 4},
-          {name: '填空题', value: 6},
-        ],
-        chartDataBarCorrect:[
-          {name: '单选题20道', value: 5},
-          {name: '多选题5道', value: 2},
-          {name: '判断题5道', value: 1},
-          {name: '填空题5道', value: 3},
-        ],
-        chartDataLineRanking:[],
-        chartDataPieTime:[],
-        paperInfo:{},
-        myScore:0,
-        maxScore:0,
-        minScore:0,
-        ranking:0,
-        percentage:0,
-        averageScore:0
+        answerId:this.$route.params.answerId,
+        answer:{}
       }
     },
     created(){
@@ -112,7 +97,7 @@
         text: '报告生成中...',
         spinnerType: 'snake'
       });
-      this.getScoreReport();
+      this.getAnswer();
     },
     computed: {
       optionLeft () {
@@ -126,29 +111,10 @@
     },
     methods: {
       // 获取成绩报告数据
-      async getScoreReport(){
-        const {sno, paperId} = this;
-        let result = await reqScoreReport({sno, paperId});
-        if (result.statu == 0){
-          this.chartDataRingScore = result.data.chartDataRingScore;
-          this.chartDataBarCorrect = result.data.chartDataBarCorrect;
-          this.chartDataLineRanking = result.data.chartDataLineRanking;
-          this.chartDataPieTime = result.data.chartDataPieTime;
-          this.paperInfo = result.data.paperInfo;
-          //全部人分数
-          var score = 0;
-          this.chartDataLineRanking.forEach((item, index) => {
-            score += item.value;
-            if (item.name == '我'){
-              this.myScore = item.value;
-              this.ranking = this.chartDataLineRanking.length - index;
-            }
-          });
-          this.maxScore = this.chartDataLineRanking[this.chartDataLineRanking.length - 1].value;
-          this.minScore = this.chartDataLineRanking[0].value;
-          this.percentage = this.myScore/result.data.totalScore*100;
-          // this.averageScore = (score/this.chartDataLineRanking.length).toFixed(2);
-          this.averageScore = Math.round(score/this.chartDataLineRanking.length);
+      async getAnswer(){
+        let result = await queryAnswerResult(qs.stringify({answer_id:this.answerId}));
+        if (result.status == 200){
+          this.answer = result.data
           setTimeout(() => {
             Indicator.close();
           }, 500)
@@ -168,7 +134,8 @@
       BarSchart,
       LineSchart,
       PieSchart,
-      BackToTop
+      BackToTop,
+      mavonEditor
     }
   }
 </script>

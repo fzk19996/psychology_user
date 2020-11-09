@@ -1,23 +1,34 @@
 <template>
 <section class="wrong_collection">
-    <HeaderTop :title="push.name">
-        <a href="javascript:" slot="left" class="go_back" @click="$router.goBack()">
-            <i class="iconfont iconxiazai6"></i>返回
-        </a>
-    </HeaderTop>
     <div id="article" class="content3 container">
-		<leftNav></leftNav>
-		<div class="contentArt fr">
-			<div class="article">
-				<div class="article_title container">
-					<h4>{{article.title}}</h4>
-				</div>
-				<span v-html="article.content"></span>
-			</div>
-		</div>
-	</div>
-    <div>
-        <el-button @click="toTest" >进入测试</el-button>
+      <HeaderTop :title="push.name">
+          <a href="javascript:" slot="left" class="go_back" @click="$router.goBack()">
+              <i class="iconfont iconxiazai6"></i>返回
+          </a>
+      </HeaderTop>
+		<!-- <leftNav></leftNav> -->
+      <div class="contentArt fr">
+        <div class="article">
+          <div class="article_title container">
+            <h4>{{article.title}}</h4>
+          </div>
+          <!-- <div class="markdown-body" v-html="article.content"/> -->
+        <!-- <mavon-editor v-html="article.content" style="padding:20px"></mavon-editor> -->
+          <mavon-editor
+            class="md"
+            :value="article.content"
+            :subfield = "false"
+            :defaultOpen = "'preview'"
+            :toolbarsFlag = "false"
+            :editable="false"
+            :scrollStyle="true"
+            :ishljs = "true"
+          ></mavon-editor>
+          </div>
+      </div>
+      <div style="text-align:center">
+          <el-button @click="toTest" >进入测试</el-button>
+      </div>
     </div>
 </section>
 
@@ -27,9 +38,11 @@
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
   import {Toast, MessageBox, Indicator} from 'mint-ui'
-  import { queryArticleById, getTestById, beginExam} from '../../api'
+  import { queryArticleById, getTestById, beginExam, endExam} from '../../api'
   import {getNumberPrefix} from '../../utils/common.js'
   import {mapState, mapActions, mapGetters} from 'vuex'
+  import {mavonEditor} from 'mavon-editor'
+  import 'mavon-editor/dist/css/index.css'
   import qs from 'qs'
 
   export default {
@@ -43,7 +56,8 @@
       }
     },
     components:{
-      HeaderTop
+      HeaderTop,
+      mavonEditor
     },
     computed:{
       ...mapState([
@@ -108,7 +122,7 @@
                     duration:2000
                   })
                 }else{
-                  this.toTest(test_info);
+                  this.toTest();
                   return;
                 }
               }
@@ -133,9 +147,11 @@
 <style lang="stylus" type="text/stylus" rel="stylesheet/stylus" scoped>
   @import "../../common/stylus/mixins.styl"
   .content3
-    width 1200px
-    min-height 650px
+    width 60%
+    min-height 1000px
     margin-top 38px
+    margin-left 20%
+    
   .contentArt
     width 890px
     margin-top 10px

@@ -153,7 +153,7 @@ export default new VueRouter({
       component: FillCollection
     },
     {
-      path:'/profile/stuscore/detail/:paperId',
+      path:'/profile/stuscore/detail/:answerId',
       component:ProfileScoreDetail
     },
     {

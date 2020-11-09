@@ -47,6 +47,13 @@ export const getUserTestRes = (data) => ajax('/api/test/getUserTestRes', data, '
 
 export const queryTestListByUserId = (data) =>  ajax('/api/test/queryTestListByUserId', data, 'POST', 'application/x-www-form-urlencoded')
 
+export const queryUserAnswers = (data) => ajax('/api/answer/queryUsernAnswers', data, 'POST')
+
+
+/*
+查看答案接口
+*/
+export const queryAnswerResult = (data) => ajax('/api/answer/queryAnswerResult', data, 'POST', 'application/x-www-form-urlencoded')
 
 
 /*
@@ -194,3 +201,6 @@ export const reqJudgeByAnswerId = ({answerId}) => ajax(BASE_URL + '/getJudgeByAn
   通过answerId获取收藏填空题目详情
  */
 export const reqFillByAnswerId = ({answerId}) => ajax(BASE_URL + '/getFillByAnswerId', {answerId})
+
+
+

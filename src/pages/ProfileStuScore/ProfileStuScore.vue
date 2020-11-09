@@ -21,30 +21,18 @@
     </div>
 
     <!--查看学生全部试卷成绩-->
-    <mt-loadmore v-if="scoreList.length" :top-method="loadTop" ref="loadmore">
-      <div class="score_list" v-for="(item, index) in scoreList" :key="item.scoreId">
+    <mt-loadmore v-if="answerList.length" :top-method="loadTop" ref="loadmore">
+      <div class="score_list" v-for="(item, index) in answerList" :key="item.answerId">
         <div class="score_list_item" :class="{'corner_new':index == 0}">
-          <div class="score_title">
-            {{item.paperName}}
-          </div>
-          <div class="score_type">
-            试卷题目：{{item.title}}
-          </div>
           <div class="score_create_time">
-            考试时间：{{item.create_time}}分钟
-          </div>
-          <div class="score_item">
-            试卷总分：{{item.score}}分
+            考试时间：{{item.createTime}}分钟
           </div>
           <div class="score_item">
             试卷状态：{{item.state}}
           </div>
           <div class="score_participate">
-            <div class="score_participate_left">
-              <img src="../../common/imgs/person.png" alt=""><span style="color: #FF0000">{{item.participateNum}}</span>人已参加
-            </div>
             <div class="score_participate_right">
-              <mt-button size="small" type="primary" @click.native="toScoreDetail(item.paperId)" :disabled="item.score == null">查看报告</mt-button>
+              <mt-button size="small" type="primary" @click.native="toAnswerDetail(item.answerId)">查看报告</mt-button>
             </div>
           </div>
         </div>
@@ -55,9 +43,9 @@
     </mt-loadmore>
 
     <!--无成绩显示提示图片-->
-    <div class="no_score_list animated" v-show="isScoreList">
+    <div class="no_score_list animated" v-show="answerList.length==0">
       <img src="../../common/imgs/nopaper.png" alt="">
-      <h3>暂无成绩</h3>
+      <h3>暂无提交答案</h3>
     </div>
 
     <!--点击返回顶部按钮-->
@@ -69,7 +57,7 @@
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
   import Star from '../../components/Star/Star.vue'
   import BackToTop from '../../components/BackToTop'
-  import {reqPaperScoreInfo, getUserTestRes} from '../../api'
+  import {queryAnswerResult, queryUserAnswers} from '../../api'
   import {Toast, Indicator} from 'mint-ui'
   import { mapState } from 'vuex'
   export default {
@@ -86,8 +74,7 @@
           background: '#e7eaf1'// 按钮的背景颜色 The background color of the button
         },
         sno:this.$store.state.userInfo.sno,
-        isScoreList:false,
-        scoreList:[]
+        answerList:[]
       }
     },
     computed: {
@@ -101,7 +88,7 @@
       ...mapState(['examCalendar'])
     },
     created(){
-      this.getScoreList();
+      this.getAnswerList();
     },
     methods: {
       loadTop() {
@@ -110,15 +97,12 @@
           this.$refs.loadmore.onTopLoaded()
         }, 1000)
       },
-      async getScoreList(){
+      async getAnswerList(){
         const {sno} = this;
-        let result = await getUserTestRes();
+        let result = await queryUserAnswers();
         if(result.status == 200){
-          this.scoreList = result.data;
+          this.answerList = result.data;
           console.log(this.scoreList)
-        }
-        else if (!result.data) {
-          this.isScoreList = true;
         }
         else {
           Toast({
@@ -127,12 +111,12 @@
           });
         }
       },
-      toScoreDetail(paperId){
+      toAnswerDetail(answerId){
         /*Indicator.open({
           text: '加载中...',
           spinnerType: 'fading-circle'
         });*/
-        this.$router.push('/profile/stuscore/detail/' + paperId)
+        this.$router.push('/profile/stuscore/detail/' + answerId)
 /*        setTimeout(() => {
           Indicator.close();
         }, 300)*/
