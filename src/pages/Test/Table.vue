@@ -66,6 +66,8 @@
       </section>
       <!--上一题和下一题按钮-->
       <div class="paper_button">
+        <button v-if="questionIndex>0" @click="prevQue()">上一题</button>
+        <button  @click="nextQuestion()">下一题</button>
       </div>
       <!-- </template> -->
 
@@ -307,7 +309,7 @@
                     }
                 }
             }
-            else if(e1 && e1.keyCode==13){
+            else if(e1 && e1.keyCode==61){
                 that.nextQuestion()
             }
 
@@ -328,7 +330,7 @@
     methods: {
       ...mapActions([
         'nextQue',//点击下一题
-        'prevQue',//点击上一题
+        // 'prevQue',//点击上一题
         'cardQue',//点击答题卡序号
         'recordFirstCurrentTime',//记录当前花费时间
         'recordSingleAnswers',//记录单选题答案到数组，第一个参数为数组下标，第二个参数为当前下标的值
@@ -478,22 +480,30 @@
         }
         this.isShowUploadVideo = false;
       },
-      //进度条
-      uploadVideoProcess (event, file, fileList) {
-        this.videoFlag = true;
-        this.videoUploadPercent = file.percentage.toFixed(0) * 1;
-      },
-
-      //上传成功回调
-      handleVideoSuccess (res, file) {
-        this.isShowUploadVideo = true;
-        this.videoFlag = false;
-        this.videoUploadPercent = 0;
-        console.log(res)
-        if(res){
-          this.video_url = res
+      async prevQue(){
+        if(this.questionIndex>0){
+          this.questionIndex -= 1
+          let res = await queryRedisAnswerVO();
+          if(res.status==200){
+            var question  = res.data.tableQuestionVOList[this.questionIndex]
+            this.questionVO = question
+            var answer = res.data.tableAnswerList[this.questionIndex]
+            if(question.type=='单选'){
+              this.singleAnswer = parseInt(answer.answer)
+            }
+            else if(question.type=='多选'){
+              this.multipleAnswer = answer.answer.split(";")
+              for(var i=0;i<this.multipleAnswer.length;i++){
+                this.multipleAnswer[i] = parseInt(this.multipleAnswer[i])
+              }
+            }
+            else if (question.type=='填空'){
+              this.fillAnswer = answer.answer
+            }
+            this.total_cnt = res.data.tableQuestionVOList.length
+          }
         }
-      },
+      }
       
     },
     components: {

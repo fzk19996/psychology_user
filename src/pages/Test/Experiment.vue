@@ -132,6 +132,12 @@
       ...mapGetters(['completeNumber'])
     },
 
+    mounted(){
+      this.$once('hook:beforeDestroy', () => {            
+          clearInterval(this.timer);                                    
+      })
+    },
+
     async created() {
       // Indicator.open({
       //   text: '加载中...',
@@ -142,6 +148,7 @@
         let res = await continueExam()
         if(res.status==200){
           this.questionVO = res.data
+          console.log("收到继续题目")
           console.log(this.questionVO)
           this.questionIndex = this.questionVO.index
           this.record_start = (new Date()).getTime();
@@ -168,6 +175,7 @@
               console.log('按键无效')
               return
             }
+            console.log('按键有效：'+that.key_effect)
             //事件对象兼容
             let e1 = e || event || window.event || arguments.callee.caller.arguments[0]
             //键盘按键判断:左箭头-37;上箭头-38；右箭头-39;下箭头-40
@@ -268,10 +276,10 @@
         }
       },
 
-      nextQuestion2(){
+      async nextQuestion2(){
         this.questionIndex += 1
         if(this.questionIndex<this.total_cnt){
-          this.queryExamQuestion()
+          await this.queryExamQuestion()
         }
         this.key_effect = true
       },
@@ -361,9 +369,9 @@
         answer.time_use = new Date().getTime() - this.start_question_time
         answer.end =  new Date().getTime()
         answer.type = 'experiment'
-        if(this.questionVO.time_limit!=0){
+        if(this.questionVO.timeLimit!=0){
             clearInterval(this.timer)
-            console.log(this.fillAnswer)
+            // console.log(this.fillAnswer)
             if(this.questionVO.type=='奖励按键反应' 
                 && this.questionVO.right_answer === this.fillAnswer){
                     Toast({
@@ -373,10 +381,10 @@
                     let _this = this
                     setTimeout(function()  {
                       answer.answer = _this.fillAnswer
-                      answer.question_id = this.questionVO.questionId
-                      answer.que_type = this.questionVO.type
+                      answer.question_id = _this.questionVO.questionId
+                      answer.que_type = _this.questionVO.type
                       answer.correct = 1
-                      answer.index = this.questionIndex
+                      answer.index = _this.questionIndex
                       if(_this.submitAnswer(answer))
                         _this.nextQuestion2()
                       else
@@ -393,10 +401,10 @@
                   let _this = this
                     setTimeout(function()  {
                       answer.answer = _this.fillAnswer
-                      answer.question_id = this.questionVO.questionId
-                      answer.que_type = this.questionVO.type
+                      answer.question_id = _this.questionVO.questionId
+                      answer.que_type = _this.questionVO.type
                       answer.correct = 0
-                      answer.index = this.questionIndex
+                      answer.index = _this.questionIndex
                        if(_this.submitAnswer(answer))
                         _this.nextQuestion2()
                       else
@@ -424,7 +432,7 @@
         answer.question_id = this.questionVO.questionId
         answer.que_type = this.questionVO.type
         answer.index = this.questionIndex
-         if(this.submitAnswer(answer))
+         if(await this.submitAnswer(answer))
               this.nextQuestion2()
          else
               console.log("提交答案失败")
