@@ -373,7 +373,7 @@
             clearInterval(this.timer)
             // console.log(this.fillAnswer)
             if(this.questionVO.type=='奖励按键反应' 
-                && this.questionVO.right_answer === this.fillAnswer){
+                && this.questionVO.rightAnswer === this.fillAnswer){
                     Toast({
                       message: "回答正确",
                       duration: 2000
@@ -393,7 +393,7 @@
                     return
             }
             else if(this.questionVO.type=='惩罚按键反应' 
-                && this.questionVO.right_answer !== this.fillAnswer){
+                && this.questionVO.rightAnswer !== this.fillAnswer){
                   Toast({
                       message: "回答错误",
                       duration: 2000
@@ -413,7 +413,7 @@
                     return 
             }
             if(this.questionVO.type.indexOf('按键反应')>=0){
-                if(this.questionVO.right_answer!==this.fillAnswer){
+                if(this.questionVO.rightAnswer!==this.fillAnswer){
                     answer.correct = 0
                 }else{
                     answer.correct = 1
@@ -421,7 +421,7 @@
             }
         }
         if(this.questionVO.type.indexOf('工作记忆模板')>=0){
-          if(this.questionVO.right_answer!==this.fillAnswer){
+          if(this.questionVO.rightAnswer!==this.fillAnswer){
             answer.correct = 0
           }else{
             answer.correct = 1 
@@ -455,7 +455,7 @@
           return false;
         }
         if (!isLt1000M) {
-          this.$message.error('上传视频大小不能超过1000MB哦!');
+          this.$message.error('上传视频大小不能超过1000MB!');
           return false;
         }
         this.isShowUploadVideo = false;

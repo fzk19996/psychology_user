@@ -112,6 +112,7 @@
         total_cnt:0,
         question_submit:{},
 
+        next_effect: true,
         questionIndex:0,
 
       }
@@ -178,6 +179,7 @@
                 if(question_now.options.length>=1){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 0
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         // console.log(that.multipleAnswer)
@@ -199,6 +201,7 @@
                 if(question_now.options.length>=2){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 1
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -219,6 +222,7 @@
                 if(question_now.options.length>=3){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 2
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -239,6 +243,7 @@
                 if(question_now.options.length>=4){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 3
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -258,6 +263,7 @@
                 if(question_now.options.length>=5){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 4
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -277,6 +283,7 @@
                 if(question_now.options.length>=6){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 5
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -297,6 +304,7 @@
                 if(question_now.options.length>=7){
                     if(question_now.type=='单选'){
                         that.singleAnswer = 6
+                        that.nextQuestion()
                     }
                     else if(question_now.type=='多选'){
                         for(var i=0;i<that.multipleAnswer.length;i++){
@@ -310,7 +318,7 @@
                 }
             }
             else if(e1 && e1.keyCode==61){
-                that.nextQuestion()
+                // that.nextQuestion()
             }
 
         }
@@ -353,10 +361,20 @@
           this.time_use += 1
         }
       },
+    
+    end_answer(){
+      this.next_effect = true
+    },
 
     async nextQuestion(){
       // console.log(this.setAnswer())
+      if(!this.next_effect){
+        console.log("下一题禁止")
+        return
+      }
+      this.next_effect = false
       if(!this.setAnswer()){
+        this.end_answer()
         return
       }
       let res = await addAnswer(JSON.stringify(this.answer_sub))
@@ -365,11 +383,13 @@
             message: '提交答案失败',
             duration: 1500
         })
+        this.end_answer()
         return
       }
       console.log('成功')
       if(this.questionIndex+1>=this.total_cnt){
         //进入实验页面
+        this.end_answer()
         this.$router.push({name:"experiment", params:{mode:"normal"}})
         return
       }
@@ -384,6 +404,7 @@
             duration: 1500
           });
       }
+      this.end_answer()
     },
 
       //点击返回按钮
@@ -413,6 +434,7 @@
                 return false
             }else{
                 answer_final = this.singleAnswer
+                this.singleAnswer = ''
                 score = this.questionVO.options[answer_final].score
                 // this.answer.answer_list[this.current_index] = this.singleAnswer
                 this.singleAnswer = ''
