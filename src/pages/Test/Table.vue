@@ -44,7 +44,7 @@
             <div v-for="(option, optionIndex) in questionVO.options"
                 :key="optionIndex">
               <div class="single_option">
-              <mu-radio :value="optionIndex" v-model="singleAnswer" :label="option.content" v-if="option.content"  ></mu-radio>
+              <mu-radio :value="optionIndex" v-model="singleAnswer" :label="option.content" v-if="option.content"  @click="click_single_radio(optionIndex)"></mu-radio>
               </div>
             </div>
           </template>
@@ -352,6 +352,11 @@
         'refreshFillAnswers',
         'refreshFirstCurrentTime',
       ]),
+
+      click_single_radio(index){
+        this.singleAnswer = index
+        this.nextQuestion()
+      },
 
       start_timer(){
         if(this.time_use>=this.experiment.questions[this.current_index_e].time_limit){
