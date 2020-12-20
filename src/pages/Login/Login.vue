@@ -27,10 +27,10 @@
         <mt-field label="密码" placeholder="请输入密码" type="password" v-model="stuPsw" :state="pswState" @blur.native.capture="checkPsw" @keyup.enter.native="checkLogin"/>
         <mt-button type="primary" size="large" @click.native="checkLogin">登录</mt-button>
 
-        <div class="toggle-login">
+        <!-- <div class="toggle-login">
           <span @click="toRegister">没有账号？马上注册</span>
           <span @click="toFindPsw">忘记密码？</span>
-        </div>
+        </div> -->
       </div>
     <!--</transition>-->
 
