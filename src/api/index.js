@@ -47,7 +47,7 @@ export const getUserTestRes = (data) => ajax('/api/test/getUserTestRes', data, '
 
 export const queryTestListByUserId = (data) =>  ajax('/api/test/queryTestListByUserId', data, 'POST', 'application/x-www-form-urlencoded')
 
-export const queryUserAnswers = (data) => ajax('/api/answer/queryUsernAnswers', data, 'POST')
+export const queryUserAnswers = (data) => ajax('/api/answer/queryUserAnswers', data, 'POST')
 
 
 /*
