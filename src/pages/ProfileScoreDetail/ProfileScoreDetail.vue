@@ -30,10 +30,10 @@
       <!-- <RingSchart :chartData="chartDataRingScore"/>
       <BarSchart :chartData="chartDataBarCorrect"/>
       <LineSchart :chartData="chartDataLineRanking"/> -->
-      <div style="margin-bottom:20px"> 分数</div>
+      <div style="margin-bottom:20px"> 测试名称：{{answer.test_name}}</div>
       <el-row v-for="(tmp,index) in answer.varNameList">
           <el-col>
-            变量名：{{answer.varNameList[index]}}
+            测试内容：{{answer.varNameList[index]}}
           </el-col>
           <el-col>
             分数值：{{answer.scoreList[index]}}
@@ -41,7 +41,7 @@
       </el-row>
     </div>
     <div style="margin-top:50px">
-      <div style="text-align:center"> 管理员评语</div>
+      <div style="text-align:center"> 测验结果解释与说明</div>
       <div style="margin-left:20%;margin-right:20%;margin-top:20px;width:60%">
         <mavon-editor
               class="md"
@@ -93,10 +93,10 @@
       }
     },
     created(){
-      Indicator.open({
-        text: '报告生成中...',
-        spinnerType: 'snake'
-      });
+      // Indicator.open({
+      //   text: '报告生成中...',
+      //   spinnerType: 'snake'
+      // });
       this.getAnswer();
     },
     computed: {
