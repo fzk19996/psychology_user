@@ -8,7 +8,6 @@
     </HeaderTop>
 
     <div class="profile_psw_change_field">
-      <mt-field label="原始密码" placeholder="请输入原始密码" type="password" v-model="password"></mt-field>
       <mt-field label="新密码" placeholder="请输入新密码" type="password" v-model="newPassword"></mt-field>
       <mt-field label="确认新密码" placeholder="请再次输入新密码" type="password" v-model="newPasswordConfirm"></mt-field>
       <mt-button type="primary" size="large" @click="checkPswChange">确定</mt-button>
@@ -18,46 +17,33 @@
 
 <script>
   import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
-  import {reqPswChange} from '../../api'
+  import {updatePassword} from '../../api'
   import {Toast, MessageBox} from 'mint-ui'
+  import qs from 'qs'
   export default {
     name: "",
     data() {
       return {
-        sno:this.$store.state.userInfo.sno,
-        password:'',
         newPassword:'',
         newPasswordConfirm:''
       }
     },
     methods: {
       async checkPswChange(){
-        const {sno, password, newPassword, newPasswordConfirm} = this;
-        let result = await reqPswChange({sno, password, newPassword, newPasswordConfirm});
-        if (result.statu == 0) {
+        if(this.newPassword!=this.newPasswordConfirm){
+          Toast({
+            message: '密码不一致',
+            duration: 1500
+          });
+        }
+        let result = await updatePassword(qs.stringify({password:this.newPassword}));
+        if (result.status == 200) {
           Toast({
             message: '密码修改成功',
             iconClass: 'iconfont iconunie045',
             duration: 1500
           });
-          this.$router.replace('/profile');
         }
-/*        else if (result.msg == '会话失效，请重新登录'){
-          MessageBox.confirm('会话失效，是否重新登录？').then(action => {
-            //点击确定按钮操作
-            //清空sessionStorage会话
-            sessionStorage.clear();
-            // 请求退出
-            this.$store.dispatch('logout');
-            Toast({
-              message: '请重新登录系统',
-              duration: 1500
-            });
-            this.$router.push('/login')
-          },() => {
-            //点击取消按钮操作
-          })
-        }*/
         else {
           Toast({
             message: result.msg,

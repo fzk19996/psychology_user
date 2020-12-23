@@ -32,7 +32,7 @@
       <LineSchart :chartData="chartDataLineRanking"/> -->
       <div style="margin-bottom:20px"> 测试名称：{{answer.test_name}}</div>
       <el-row v-for="(tmp,index) in answer.varNameList">
-          <el-col>
+          <el-col >
             测试内容：{{answer.varNameList[index]}}
           </el-col>
           <el-col>

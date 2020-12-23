@@ -7,6 +7,13 @@ import ajax from './ajax'
 const BASE_URL = 'http://127.0.0.1:8081'
 
 /*
+用户接口
+ */
+export const updatePassword = (data) => ajax('/api/user/updatePassword', data, 'POST', 'application/x-www-form-urlencoded')
+
+
+
+/*
 答案接口
  */
 export const addAnswer = (data) => ajax('/api/answer/addAnswer', data, 'POST')
